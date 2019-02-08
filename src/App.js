@@ -3,8 +3,14 @@ import Highcharts from 'highcharts/highstock'
 import HighchartsReact from 'highcharts-react-official'
 import goldData from './Data/goldFutures.js'
 
+var moment = require('moment-timezone');
+moment().tz("America/New_York").format();
+
 const finalData = goldData.map( bar => {
-    return {"x": Date.parse(bar["Date"] + " " + bar["Time"]),
+
+    const dateTime = moment((bar["Date"] + " " + bar["Time"])).tz('America/New_York').format('x').to_i
+
+    return {"x": dateTime,
     "open": bar["Open"],
     "high": bar["High"],
     "low": bar["Low"],
@@ -12,11 +18,10 @@ const finalData = goldData.map( bar => {
   })
 
 const options = {
-
         plotOptions: {
            candlestick: {
-                      color: 'green',
-                      upColor: 'red'
+                      color: 'red',
+                      upColor: 'green'
                   }
               },
 
