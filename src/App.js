@@ -1,14 +1,11 @@
-import React, { Component } from 'react'
-import Highcharts from 'highcharts/highstock'
-import HighchartsReact from 'highcharts-react-official'
-import goldData from './Data/goldFutures.js'
-
-var moment = require('moment-timezone');
-moment().tz("America/New_York").format();
+import React, { Component } from 'react';
+import Highcharts from 'highcharts/highstock';
+import HighchartsReact from 'highcharts-react-official';
+import goldData from './Data/goldFutures.js';
+import moment from 'moment-timezone';
 
 const finalData = goldData.map( bar => {
-
-    const dateTime = moment((bar["Date"] + " " + bar["Time"])).tz('America/New_York').format('x').to_i
+  const dateTime = parseInt(moment(bar["Date"] + " " + bar["Time"]).tz('America/New_York').format('x'))
 
     return {"x": dateTime,
     "open": bar["Open"],
@@ -23,7 +20,7 @@ const options = {
                       color: 'red',
                       upColor: 'green'
                   }
-              },
+        },
 
         rangeSelector: {
             selected: 1
@@ -33,11 +30,68 @@ const options = {
             text: 'MVF Backtesting App'
         },
 
-        series: [{
+       time: {
+            timezone: 'America/New_York'
+       },
+
+      series: [{
             type: 'candlestick',
             name: 'Gold',
             data: finalData
+        },
+        {
+        type: 'flags',
+        data: [{
+            x: 1545058800000,
+            title: 'A',
+            text: 'Shape: "squarepin"'
+        }, {
+            x: 1545030000000,
+            title: 'A',
+            text: 'Shape: "squarepin"'
         }],
+        onSeries: 'dataseries',
+        shape: 'squarepin',
+        width: 16
+    }, {
+        type: 'flags',
+        data: [{
+            x: 1545037200000,
+            y: 1261,
+            title: 'b',
+            text: 'Shape: "circlepin"'
+        }, {
+            x: 1545044400000,
+            title: 'B',
+            text: 'Shape: "circlepin"'
+        }],
+        onSeries: 'dataseries',
+        shape: 'circlepin',
+        width: 15}],
+
+        annotations: [{
+       labelOptions: {
+           backgroundColor: 'rgba(255,255,255,0.5)',
+           verticalAlign: 'top',
+           y: 15
+       },
+
+       labels: [{
+           point: {
+               xAxis: 1545058800000,
+               yAxis: 1245
+           },
+           text: 'Arbois'
+       }, {
+           point: {
+               xAxis: 0,
+               yAxis: 0,
+               x: 45.5,
+               y: 611
+           },
+           text: 'Montrond'
+       }]
+     }],
 
         yAxis: {
             title: {
@@ -53,6 +107,7 @@ const options = {
             }]
         }
     }
+
 
 class App extends Component {
     render() {
