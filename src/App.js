@@ -11,7 +11,15 @@ const finalData = goldData.map( bar => {
     "close": bar["Close"]}
   })
 
-const plotOptions = {
+const options = {
+
+        plotOptions: {
+           candlestick: {
+                      color: 'green',
+                      upColor: 'red'
+                  }
+              },
+
         rangeSelector: {
             selected: 1
         },
@@ -24,7 +32,21 @@ const plotOptions = {
             type: 'candlestick',
             name: 'Gold',
             data: finalData
-        }]
+        }],
+
+        yAxis: {
+            title: {
+                text: 'Price'
+            },
+            plotBands: [{
+                from: 1240,
+                to: 1250,
+                color: 'rgba(68, 170, 213, 0.2)',
+                label: {
+                    text: 'A Good Zone'
+                }
+            }]
+        }
     }
 
 class App extends Component {
@@ -34,7 +56,7 @@ class App extends Component {
           <HighchartsReact
             highcharts={Highcharts}
             constructorType={'stockChart'}
-            options={plotOptions}
+            options={options}
           />
         </div>
       )
