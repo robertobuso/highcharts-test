@@ -15,7 +15,7 @@ export default class HighchartsReact extends React.PureComponent {
       props.options,
       props.callback ? props.callback : undefined
     );
-    this.rectangle()
+    this.renderRectangle()
   }
 
   componentDidUpdate() {
@@ -35,13 +35,23 @@ export default class HighchartsReact extends React.PureComponent {
     }
   }
 
-  rectangle() { // on complete
-    this.chart.renderer.rect(100, 100, 100, 100, 5)
+  renderRectangle() {
+    const rectangle = this.chart.renderer.rect(100, 200, 50, 20, 5)
         .attr({
             'stroke-width': 2,
             stroke: 'red',
             fill: 'yellow',
-            zIndex: 3
+            opacity: 0.4,
+            zIndex: -0
+        }).on('click', () => {
+            rectangle.animate({
+                x: 50,
+                y: 100,
+                width: 200,
+                height: 200,
+                'stroke-width': 2
+            });
+
         }).add();
 
 }
