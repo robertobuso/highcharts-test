@@ -1,8 +1,15 @@
 import React, { Component } from 'react';
 import Highcharts from 'highcharts/highstock';
-import HighchartsReact from 'highcharts-react-official';
 import goldData from './Data/goldFutures.js';
 import moment from 'moment-timezone';
+
+import HighchartsReact from './HighchartsReact.js'
+
+require('highcharts/indicators/indicators')(Highcharts)
+require('highcharts/indicators/pivot-points')(Highcharts)
+require('highcharts/indicators/macd')(Highcharts)
+require('highcharts/modules/exporting')(Highcharts)
+require('highcharts/modules/map')(Highcharts)
 
 const finalData = goldData.map( bar => {
   const dateTime = parseInt(moment(bar["Date"] + " " + bar["Time"]).tz('America/New_York').format('x'))
@@ -109,7 +116,11 @@ const options = {
     }
 
 
+
+
 class App extends Component {
+
+  
     render() {
       return (
          <div>
