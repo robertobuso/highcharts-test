@@ -9,7 +9,9 @@ require('highcharts/indicators/indicators')(Highcharts)
 require('highcharts/indicators/pivot-points')(Highcharts)
 require('highcharts/indicators/macd')(Highcharts)
 require('highcharts/modules/exporting')(Highcharts)
-require('highcharts/modules/map')(Highcharts)
+require('highcharts/modules/xrange')(Highcharts)
+
+
 
 const finalData = goldData.map( bar => {
   const dateTime = parseInt(moment(bar["Date"] + " " + bar["Time"]).tz('America/New_York').format('x'))
@@ -22,7 +24,11 @@ const finalData = goldData.map( bar => {
   })
 
 const options = {
-        plotOptions: {
+
+      chart: {
+        type: 'candlestick'
+      }
+,        plotOptions: {
            candlestick: {
                       color: 'red',
                       upColor: 'green'
@@ -41,40 +47,26 @@ const options = {
             timezone: 'America/New_York'
        },
 
-      series: [{
+      series: [
+              {
             type: 'candlestick',
             name: 'Gold',
             data: finalData
         },
         {
-        type: 'flags',
-        data: [{
-            x: 1545058800000,
-            title: 'A',
-            text: 'Shape: "squarepin"'
-        }, {
-            x: 1545030000000,
-            title: 'A',
-            text: 'Shape: "squarepin"'
-        }],
-        onSeries: 'dataseries',
-        shape: 'squarepin',
-        width: 16
-    }, {
-        type: 'flags',
-        data: [{
-            x: 1545037200000,
-            y: 1261,
-            title: 'b',
-            text: 'Shape: "circlepin"'
-        }, {
-            x: 1545044400000,
-            title: 'B',
-            text: 'Shape: "circlepin"'
-        }],
-        onSeries: 'dataseries',
-        shape: 'circlepin',
-        width: 15}],
+            type: 'xrange',
+            pointWidth: 20,
+              data: [{
+                  x: 1545058800000,
+                  x2: 1545030000000,
+                  y: 1240,
+                  partialFill: 0.25
+              }, {
+                  x: 1545037200000,
+                  x2: 1545044400000,
+                  y: 1260
+              }]
+    }],
 
         annotations: [{
        labelOptions: {
@@ -101,6 +93,7 @@ const options = {
      }],
 
         yAxis: {
+            min: 1225,
             title: {
                 text: 'Price'
             },
@@ -120,7 +113,7 @@ const options = {
 
 class App extends Component {
 
-  
+
     render() {
       return (
          <div>

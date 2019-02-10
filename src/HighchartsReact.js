@@ -1,5 +1,6 @@
 import React from "react";
 
+
 export default class HighchartsReact extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -15,7 +16,7 @@ export default class HighchartsReact extends React.PureComponent {
       props.options,
       props.callback ? props.callback : undefined
     );
-    this.renderRectangle()
+    // this.renderRectangle()
   }
 
   componentDidUpdate() {
@@ -36,7 +37,9 @@ export default class HighchartsReact extends React.PureComponent {
   }
 
   renderRectangle() {
-    const rectangle = this.chart.renderer.rect(100, 200, 50, 20, 5)
+    const xAxis = this.chart.xAxis[0];
+    const yAxis = this.chart.yAxis[0];
+    const rectangle = this.chart.renderer.rect(xAxis.toPixels(1545058800000), yAxis.toPixels(1250), 50, 20, 5)
         .attr({
             'stroke-width': 2,
             stroke: 'red',
@@ -51,6 +54,12 @@ export default class HighchartsReact extends React.PureComponent {
                 height: 200,
                 'stroke-width': 2
             });
+      this.chart.renderer.rect(0, 0, this.chart.plotLeft, this.chart.chartHeight + this.chart.plotTop, 5)
+            .attr({
+              fill: 'white',
+              zIndex: 0
+            }).addClass('rect')
+            .add();
 
         }).add();
 

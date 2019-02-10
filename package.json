@@ -9,6 +9,7 @@
     "moment-timezone": "^0.5.23",
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
+    "react-highcharts": "^16.0.2",
     "react-moment": "^0.8.4",
     "react-scripts": "2.1.3"
   },
