@@ -55,8 +55,11 @@ const options = {
               },
 
               {
-  	groupPadding: true,
-    pointPadding: 4,
+  	type: 'columnrange',
+    name: '',
+    grouping: true,
+    groupPadding: true,
+    pointPadding: 1,
     borderRadius: 10,
     showInLegend: false,
     borderColor: 'red',
@@ -64,13 +67,12 @@ const options = {
     color: 'orange',
     opacity: 0.3,
     zIndex: -1,
-    type: 'columnrange',
-    pointRange: 0,
     data: [{
       x: 1545044400000,
       low: 1240,
       high: 1250,
-    }]
+    }],
+    pointRange: 3600000
   }
             ],
         yAxis: {
