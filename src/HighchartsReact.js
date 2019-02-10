@@ -36,34 +36,25 @@ export default class HighchartsReact extends React.PureComponent {
     }
   }
 
-  renderRectangle() {
-    const xAxis = this.chart.xAxis[0];
-    const yAxis = this.chart.yAxis[0];
-    const rectangle = this.chart.renderer.rect(xAxis.toPixels(1545058800000), yAxis.toPixels(1250), 50, 20, 5)
-        .attr({
-            'stroke-width': 2,
-            stroke: 'red',
-            fill: 'yellow',
-            opacity: 0.4,
-            zIndex: -0
-        }).on('click', () => {
-            rectangle.animate({
-                x: 50,
-                y: 100,
-                width: 200,
-                height: 200,
-                'stroke-width': 2
-            });
-      this.chart.renderer.rect(0, 0, this.chart.plotLeft, this.chart.chartHeight + this.chart.plotTop, 5)
-            .attr({
-              fill: 'white',
-              zIndex: 0
-            }).addClass('rect')
-            .add();
-
-        }).add();
-
-}
+  // renderRectangle() {
+  //   const xAxis = this.chart.xAxis[0];
+  //   const yAxis = this.chart.yAxis[0];
+  //   const rectangle = this.chart.renderer.rect(xAxis.toPixels(1545058800000), yAxis.toPixels(1250), 50, 20, 5)
+  //       .attr({
+  //           'stroke-width': 2,
+  //           stroke: 'red',
+  //           fill: 'yellow',
+  //           opacity: 0.4,
+  //           zIndex: -0
+  //       }).on('click', () => {
+  //           rectangle.animate({
+  //               x: 50,
+  //               y: 100,
+  //               width: 200,
+  //               height: 200,
+  //               'stroke-width': 2
+  //           })}).add();
+  //   }
 
   render() {
     // Create container for the chart

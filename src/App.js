@@ -13,7 +13,6 @@ require('highcharts/modules/xrange')(Highcharts)
 require('highcharts/highcharts-more.src.js')(Highcharts)
 
 
-
 const finalData = goldData.map( bar => {
   const dateTime = parseInt(moment(bar["Date"] + " " + bar["Time"]).tz('America/New_York').format('x'))
 
@@ -25,8 +24,51 @@ const finalData = goldData.map( bar => {
   })
 
 const options = {
-
       chart: {
+        zoomType: 'xy',
+        // events: {
+        //   load: function () {
+        //     const xAxis = this.xAxis[0];
+        //     const yAxis = this.yAxis[0];
+        //     const rectangle = this.renderer.rect(xAxis.toPixels(1545058800000), yAxis.toPixels(1250), 50, 20, 5)
+        //         .attr({
+        //             'stroke-width': 2,
+        //             stroke: 'red',
+        //             fill: 'yellow',
+        //             opacity: 0.4,
+        //             zIndex: -0
+        //         }).on('click', () => {
+        //             rectangle.animate({
+        //                 x: 50,
+        //                 y: 100,
+        //                 width: 200,
+        //                 height: 200,
+        //                 'stroke-width': 2
+        //             })}).add();
+        //   },
+        //   redraw: function(event) {
+        //
+        //     // if(event.target.chartBackground) {
+        //     //        event.target.chartBackground.destroy();
+        //     //  }
+        //
+        //     const x = this.xAxis[0].toPixels(1545058800000)
+        //
+        //     const y = this.yAxis[0].toPixels(1250)
+        //
+        //     const width =  this.xAxis[0].toPixels(this.axes[0].dataMax) - this.xAxis[0].toPixels(this.axes[0].dataMin)
+        //
+        //     const height =  this.yAxis[0].toPixels(this.axes[2].dataMin) - this.yAxis[0].toPixels(this.axes[2].dataMax)
+        //
+        //     const rectangle = this.renderer.rect(x, y, 50, 20)
+        //       .attr({'stroke-width': 2,
+        //       stroke: 'red',
+        //       fill: 'yellow',
+        //       opacity: 0.4,
+        //       zIndex: -0
+        //     }).add();
+        //     }
+        //   },
         type: 'candlestick'
       }
 ,        plotOptions: {
@@ -53,11 +95,10 @@ const options = {
                 name: 'Gold',
                 data: finalData
               },
-
               {
   	type: 'columnrange',
     name: '',
-    grouping: true,
+    grouping: false,
     groupPadding: true,
     pointPadding: 1,
     borderRadius: 10,
@@ -68,20 +109,26 @@ const options = {
     opacity: 0.3,
     zIndex: -1,
     data: [{
-      x: 1545044400000,
+      x: 1545022800000,
+      low: 1240,
+      high: 1250,
+    },
+    {
+      x: 1545026400000,
       low: 1240,
       high: 1250,
     }],
     pointRange: 3600000
   }
-            ],
-        yAxis: {
-            min: 1225,
-            title: {
-                text: 'Price'
-            }
-        }
-    }
+      ],
+      yAxis: {
+          min: 1225,
+          title: {
+              text: 'Price'
+          }
+      }
+      }
+
 
 
 
