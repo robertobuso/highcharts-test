@@ -10,6 +10,7 @@ require('highcharts/indicators/pivot-points')(Highcharts)
 require('highcharts/indicators/macd')(Highcharts)
 require('highcharts/modules/exporting')(Highcharts)
 require('highcharts/modules/xrange')(Highcharts)
+require('highcharts/highcharts-more.src.js')(Highcharts)
 
 
 
@@ -48,63 +49,35 @@ const options = {
        },
 
       series: [
+              { type: 'candlestick',
+                name: 'Gold',
+                data: finalData
+              },
+
               {
-            type: 'candlestick',
-            name: 'Gold',
-            data: finalData
-        },
-        {
-            type: 'xrange',
-            pointWidth: 20,
-              data: [{
-                  x: 1545058800000,
-                  x2: 1545030000000,
-                  y: 1240,
-                  partialFill: 0.25
-              }, {
-                  x: 1545037200000,
-                  x2: 1545044400000,
-                  y: 1260
-              }]
-    }],
-
-        annotations: [{
-       labelOptions: {
-           backgroundColor: 'rgba(255,255,255,0.5)',
-           verticalAlign: 'top',
-           y: 15
-       },
-
-       labels: [{
-           point: {
-               xAxis: 1545058800000,
-               yAxis: 1245
-           },
-           text: 'Arbois'
-       }, {
-           point: {
-               xAxis: 0,
-               yAxis: 0,
-               x: 45.5,
-               y: 611
-           },
-           text: 'Montrond'
-       }]
-     }],
-
+  	groupPadding: true,
+    pointPadding: 4,
+    borderRadius: 10,
+    showInLegend: false,
+    borderColor: 'red',
+    borderWidth: 2,
+    color: 'orange',
+    opacity: 0.3,
+    zIndex: -1,
+    type: 'columnrange',
+    pointRange: 0,
+    data: [{
+      x: 1545044400000,
+      low: 1240,
+      high: 1250,
+    }]
+  }
+            ],
         yAxis: {
             min: 1225,
             title: {
                 text: 'Price'
-            },
-            plotBands: [{
-                from: 1240,
-                to: 1250,
-                color: 'rgba(68, 170, 213, 0.2)',
-                label: {
-                    text: 'A Good Zone'
-                }
-            }]
+            }
         }
     }
 
@@ -112,8 +85,6 @@ const options = {
 
 
 class App extends Component {
-
-
     render() {
       return (
          <div>
