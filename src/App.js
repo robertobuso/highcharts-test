@@ -93,11 +93,27 @@ const options = {
       series: [
               { type: 'candlestick',
                 name: 'Gold',
-                data: finalData
+                data: finalData,
+                id: 'candlestick'
               },
+              {
+            type: 'flags',
+            data: [{
+                x: 1545102000000,
+                title: 'B'
+            }, {
+                x: 1545066000000,
+                title: 'B'
+            }],
+            onSeries: 'candlestick',
+           shape: 'circlepin',
+           width: 12,
+           fillColor: '#ADD8E6'
+          },
               {
   	type: 'columnrange',
     name: '',
+    id: 'zone',
     grouping: false,
     groupPadding: true,
     pointPadding: 1,
@@ -122,7 +138,7 @@ const options = {
   }
       ],
       yAxis: {
-          min: 1225,
+          min: 1240,
           title: {
               text: 'Price'
           }
