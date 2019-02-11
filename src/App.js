@@ -26,49 +26,49 @@ const finalData = goldData.map( bar => {
 const options = {
       chart: {
         zoomType: 'xy',
-        // events: {
-        //   load: function () {
-        //     const xAxis = this.xAxis[0];
-        //     const yAxis = this.yAxis[0];
-        //     const rectangle = this.renderer.rect(xAxis.toPixels(1545058800000), yAxis.toPixels(1250), 50, 20, 5)
-        //         .attr({
-        //             'stroke-width': 2,
-        //             stroke: 'red',
-        //             fill: 'yellow',
-        //             opacity: 0.4,
-        //             zIndex: -0
-        //         }).on('click', () => {
-        //             rectangle.animate({
-        //                 x: 50,
-        //                 y: 100,
-        //                 width: 200,
-        //                 height: 200,
-        //                 'stroke-width': 2
-        //             })}).add();
-        //   },
-        //   redraw: function(event) {
-        //
-        //     // if(event.target.chartBackground) {
-        //     //        event.target.chartBackground.destroy();
-        //     //  }
-        //
-        //     const x = this.xAxis[0].toPixels(1545058800000)
-        //
-        //     const y = this.yAxis[0].toPixels(1250)
-        //
-        //     const width =  this.xAxis[0].toPixels(this.axes[0].dataMax) - this.xAxis[0].toPixels(this.axes[0].dataMin)
-        //
-        //     const height =  this.yAxis[0].toPixels(this.axes[2].dataMin) - this.yAxis[0].toPixels(this.axes[2].dataMax)
-        //
-        //     const rectangle = this.renderer.rect(x, y, 50, 20)
-        //       .attr({'stroke-width': 2,
-        //       stroke: 'red',
-        //       fill: 'yellow',
-        //       opacity: 0.4,
-        //       zIndex: -0
-        //     }).add();
-        //     }
-        //   },
+//         events: {
+//           load: function () {
+//             const xAxis = this.xAxis[0];
+//             const yAxis = this.yAxis[0];
+//             const rectangle = this.renderer.rect(xAxis.toPixels(1545037200000), yAxis.toPixels(1250), 50, 20)
+//                 .attr({
+//                     'stroke-width': 2,
+//                     stroke: 'red',
+//                     fill: 'yellow',
+//                     opacity: 0.4,
+//                     zIndex: -0
+//                 }).on('click', () => {
+//                     rectangle.animate({
+//                         x: 50,
+//                         y: 100,
+//                         width: 200,
+//                         height: 200,
+//                         'stroke-width': 2
+//                     })}).add();
+//           },
+//           redraw: function(event) {
+//
+//             // if(event.target.chartBackground) {
+//             //        event.target.chartBackground.destroy();
+//             //  }
+//
+//             const x = this.xAxis[0].toPixels(1545037200000)
+//
+//             const y = this.yAxis[0].toPixels(1250)
+//
+//             const width =  this.xAxis[0].toPixels(14400000)
+//
+//             const height =  this.yAxis[0].toPixels(this.axes[2].dataMin) - this.yAxis[0].toPixels(this.axes[2].dataMax)
+//
+//             const rectangle = this.renderer.rect(x, y, width, 20)
+//               .attr({'stroke-width': 2,
+//               stroke: 'red',
+//               fill: 'yellow',
+//               opacity: 0.4,
+//               zIndex: -0
+//             }).add();
+//             }
+//           },
         type: 'candlestick'
       }
 ,        plotOptions: {
@@ -101,9 +101,9 @@ const options = {
     grouping: false,
     groupPadding: true,
     pointPadding: 1,
-    borderRadius: 10,
+    borderRadius: 0,
     showInLegend: false,
-    borderColor: 'red',
+    borderColor: '',
     borderWidth: 2,
     color: 'orange',
     opacity: 0.3,
