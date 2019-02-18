@@ -167,7 +167,17 @@ const options = {
           min: 1240,
           title: {
               text: 'Price'
+          },
+          plotLines: [{
+            color: 'blue',
+            width: 1,
+            value: 1255
+          }, {
+            color: 'blue',
+            width: 1,
+            value: 1249
           }
+        ]
       }
       }
 
