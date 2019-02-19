@@ -9,6 +9,7 @@ require('highcharts/modules/cylinder')(Highcharts)
 const options = {
   chart: {
     type: 'cylinder',
+    width: 400,
     options3d: {
         enabled: true,
         alpha: 15,
@@ -16,6 +17,18 @@ const options = {
         viewDistance: 100,
         depth: 50
     }
+  },
+
+  navigator: {
+            enabled: false
+        },
+
+  scrollbar: {
+    enabled: false
+  },
+
+  rangeSelector: {
+      enabled: false
   },
 
     title: {
@@ -57,6 +70,8 @@ const options = {
     }, {
         name: 'S',
         data: [2]
+    }, {
+      colorByPoint: true
     }]
       }
 
