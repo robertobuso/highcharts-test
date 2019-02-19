@@ -5,6 +5,8 @@ import moment from 'moment-timezone';
 
 import HighchartsReact from './HighchartsReact.js'
 
+import CylinderChart from './Components/CylinderChart.js'
+
 require('highcharts/indicators/indicators')(Highcharts)
 require('highcharts/indicators/pivot-points')(Highcharts)
 require('highcharts/indicators/macd')(Highcharts)
@@ -188,13 +190,14 @@ const options = {
 class App extends Component {
     render() {
       return (
-         <div>
-          <HighchartsReact
-            highcharts={Highcharts}
-            constructorType={'stockChart'}
-            options={options}
-          />
-        </div>
+        //  <div>
+        //   <HighchartsReact
+        //     highcharts={Highcharts}
+        //     constructorType={'stockChart'}
+        //     options={options}
+        //   />
+        // </div>
+        <CylinderChart />
       )
     }
 }
