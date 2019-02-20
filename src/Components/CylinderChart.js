@@ -35,6 +35,8 @@ const options = {
         text: 'Trade Results'
     },
 
+    tooltip: { enabled: false },
+
     xAxis: {
         categories: [],
         labels: {
@@ -58,18 +60,34 @@ const options = {
         cylinder: {
             stacking: 'normal',
             depth: 25
-        }
+        },
+
+        series: {
+           dataLabels: {
+               enabled: true,
+               inside: true
+           }
+       }
     },
 
-    series: [{
+    series: [
+              {dataLabels: {
+                align: 'center',
+                format: '({point.name})'
+                }
+              },
+            {
         name: 'T3',
-        data: [4]
+        data: [4],
+        color: '#008000'
     }, {
         name: 'BE',
-        data: [1]
+        data: [1],
+        color: '#0000FF'
     }, {
         name: 'S',
-        data: [2]
+        data: [2],
+        color: '#FF0000'
     }, {
       colorByPoint: true
     }]
