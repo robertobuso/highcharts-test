@@ -1,27 +1,53 @@
 import React, { Component } from 'react';
 
-import { Form, Checkbox, Segment, Header, Button, Grid } from 'semantic-ui-react'
+import { Grid } from 'semantic-ui-react'
 
 
 class ParametersForm extends Component {
+
+  handleSubmit = (event) => {
+    event.preventDefault()
+    console.log(event)
+  }
+
     render() {
       return (
-        <Form>
-          <Form.Field>
-            <label>First Name</label>
-            <input placeholder='First Name' />
-          </Form.Field>
-          <Form.Field>
-            <label>Last Name</label>
-            <input placeholder='Last Name' />
-          </Form.Field>
-          <Form.Field>
-            <Checkbox label='I agree to the Terms and Conditions' />
-          </Form.Field>
-          <Button type='submit'>Submit</Button>
-        </Form>
-      )
-    }
+        <>
+        <div className='parameter-form'>
+          <form onSubmit={this.handleSubmit}>
+          <Grid columns={2}>
+          <Grid.Column>
+           <label>
+             Base:
+             <input
+               name="isGoing"
+               type="checkbox"
+               // checked={this.state.isGoing}
+               // onChange={this.handleInputChange}
+               />
+            </label>
+            <br/>
+            <br/>
+            <label>
+              Number of guests:
+                <input
+                 name="numberOfGuests"
+                 type="number"
+                 // value={this.state.numberOfGuests}
+                 // onChange={this.handleInputChange}
+                 />
+            </label>
+            </Grid.Column>
+            <Grid.Column>
+            <br/>
+            <button type='submit' className='save-parameter-btn'>Save</button>
+            </Grid.Column>
+          </Grid>
+         </form>
+      </div>
+      </>
+    )
   }
+}
 
     export default ParametersForm;
