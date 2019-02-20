@@ -78,7 +78,7 @@ const options = {
         },
 
         rangeSelector: {
-            selected: 1
+            enabled: false
         },
 
         title: {
@@ -88,6 +88,8 @@ const options = {
        time: {
             timezone: 'America/New_York'
        },
+
+
 
       series: [
               { type: 'candlestick',

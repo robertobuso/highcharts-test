@@ -9,7 +9,6 @@ require('highcharts/modules/cylinder')(Highcharts)
 const options = {
   chart: {
     type: 'cylinder',
-    width: 400,
     options3d: {
         enabled: true,
         alpha: 15,
