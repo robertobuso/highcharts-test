@@ -15,30 +15,54 @@ class ParametersForm extends Component {
         <>
         <div className='parameter-form'>
           <form onSubmit={this.handleSubmit}>
-          <Grid columns={2}>
-          <Grid.Column>
+          <Grid columns={2} >
+          <Grid.Column width={10}>
            <label>
-             Base:
+             Base: {'  '}
              <input
-               name="isGoing"
-               type="checkbox"
-               // checked={this.state.isGoing}
+               name='base'
+               type='text'
+               className='number-input'
+               placeholder='40'
                // onChange={this.handleInputChange}
                />
+               <label className='right-label'>% of the Range</label>
             </label>
             <br/>
             <br/>
             <label>
-              Number of guests:
+              Shared Leg: {'  '}
+              <input
+                name='sharedLeg'
+                type='radio'
+                value='Yes'
+                // onChange={this.handleInputChange}
+                />
+                <label className='radio-btn'>{' Yes'}</label>
                 <input
-                 name="numberOfGuests"
-                 type="number"
+                  name='sharedLeg'
+                  type='radio'
+                  value='No'
+                  // onChange={this.handleInputChange}
+                  />
+                  <label>{' No'}</label>
+             </label>
+             <br/>
+             <br/>
+            <label>
+              Unused Zone:{'  '}
+                <input
+                 name='unusedZone'
+                 type='text'
+                 className='number-input'
+                 placeholder='6'
                  // value={this.state.numberOfGuests}
                  // onChange={this.handleInputChange}
                  />
+              <label className='right-label'>minimum number of Bases</label>
             </label>
             </Grid.Column>
-            <Grid.Column>
+            <Grid.Column width={1}>
             <br/>
             <button type='submit' className='save-parameter-btn'>Save</button>
             </Grid.Column>
