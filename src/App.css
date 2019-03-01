@@ -1,10 +1,42 @@
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+body {
+  width: 100%;
+}
+
+.top-row {
+  height: 75%;
+}
+
+.bottom-row {
+  height: 25%;
+}
+
+.input-scroll {
+  overflow: scroll;
+  font-size: 15px;
+
+}
+
+.input-no-scroll {
+  font-size: 9px;
+  height: 75%;
+}
+
+.chart-and-results {
+  width: 10vw;
+}
+
 .parameter-form {
   border-style: solid;
   border-width: 1px;
-  border-color: blue;
+  border-color: gray;
   border-radius: 5px;
   padding: 10px 10px 10px 0px;
-  margin: 10px
+  margin: 10px;
+  /* overflow: scroll; */
 }
 
 .save-parameter-btn {
@@ -15,6 +47,19 @@
   padding: 5px 10px;
   font-size: 12px;
   cursor: pointer;
+  float: right;
+  margin-left: 15px;
+}
+
+.default-parameter-btn {
+  border: 2px solid blue;
+  background-color: white;
+  border-radius: 10px;
+  color: blue;
+  padding: 5px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  float: right;
 }
 
 .number-input {
@@ -25,10 +70,26 @@
   text-align: center
 }
 
+.text-input {
+  border: 2px solid gray;
+  background-color: white;
+  border-radius: 5px;
+  width: 50%;
+  text-align: center
+}
+
 .radio-btn {
   margin-right: 15px;
 }
 
 .right-label {
   margin-left: 5px;
+}
+
+.second-parameter {
+  line-height: 200%;
+}
+
+.row-parameter {
+  /* height: 55px; */
 }

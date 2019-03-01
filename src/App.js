@@ -10,23 +10,22 @@ import ParametersForm from './Components/ParametersForm.js'
 class App extends Component {
     render() {
       return (
-        <Grid columns={2}>
-          <Grid.Row>
-            <Grid.Column>
+        <Grid>
+          <Grid.Row >
+            <Grid columns={2}>
+            <Grid.Column width={14}>
+              <TestChart />
             </Grid.Column>
 
-            <Grid.Column>
-              <ParametersForm />
+            <Grid.Column floated='right' width={2}>
+              <CylinderChart />
             </Grid.Column>
+          </Grid>
           </Grid.Row>
 
           <Grid.Row>
-            <Grid.Column>
-              <TestChart width={2} />
-            </Grid.Column>
-
-            <Grid.Column floated='right'>
-              <CylinderChart />
+            <Grid.Column className='input-scroll'>
+              <ParametersForm />
             </Grid.Column>
           </Grid.Row>
         </Grid>
