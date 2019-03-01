@@ -40,7 +40,7 @@ const options = {
         },
 
         title: {
-            text: 'MVF Backtesting App'
+            text: 'Envoy LLC Backtesting App'
         },
 
        time: {

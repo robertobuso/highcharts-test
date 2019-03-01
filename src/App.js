@@ -6,6 +6,7 @@ import { Grid, Menu } from 'semantic-ui-react'
 import CylinderChart from './Components/CylinderChart.js'
 import TestChart from './Components/TestChart.js'
 import ParametersForm from './Components/ParametersForm.js'
+import ResultsTable from './Components/ResultsTable.js'
 
 class App extends Component {
     render() {
@@ -28,15 +29,21 @@ class App extends Component {
          active={false}
        />
      </Menu>
+
         <Grid>
-          <Grid.Row >
+          <Grid.Row>
             <Grid columns={2}>
             <Grid.Column width={14}>
               <TestChart />
             </Grid.Column>
 
             <Grid.Column floated='right' width={2}>
+              <Grid.Row>
               <CylinderChart />
+              </Grid.Row>
+              <Grid.Row>
+                <ResultsTable />
+              </Grid.Row>
             </Grid.Column>
           </Grid>
           </Grid.Row>

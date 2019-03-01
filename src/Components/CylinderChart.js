@@ -9,6 +9,7 @@ require('highcharts/modules/cylinder')(Highcharts)
 const options = {
   chart: {
     type: 'cylinder',
+    height: '125%',
     options3d: {
         enabled: true,
         alpha: 15,
@@ -31,7 +32,7 @@ const options = {
   },
 
     title: {
-        text: 'Trade Results'
+        text: 'Results'
     },
 
     tooltip: { enabled: false },
@@ -78,12 +79,6 @@ const options = {
    },
 
     series: [
-              {dataLabels: {
-                enabled: true,
-                align: 'center',
-                format: '({point.name})'
-                }
-              },
             {
         name: 'T3',
         data: [4],
@@ -97,6 +92,11 @@ const options = {
         data: [2],
         color: '#FF0000'
     }, {
+        name: 'UNF',
+        data: [1],
+        color: '#D3D3D3'
+    },
+    {
       colorByPoint: true
     }]
       }
