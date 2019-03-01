@@ -29,15 +29,15 @@ class App extends Component {
          active={false}
        />
      </Menu>
-
-        <Grid>
+     <div>
+        <Grid style={{height: '100%'}}>
           <Grid.Row>
             <Grid columns={2}>
-            <Grid.Column width={14}>
+            <Grid.Column width={14} >
               <TestChart />
             </Grid.Column>
 
-            <Grid.Column floated='right' width={2}>
+            <Grid.Column  width={2}>
               <Grid.Row>
               <CylinderChart />
               </Grid.Row>
@@ -49,11 +49,12 @@ class App extends Component {
           </Grid.Row>
 
           <Grid.Row>
-            <Grid.Column className='input-scroll'>
+            <Grid.Column className='input-scroll' style={{height: '240px'}}>
               <ParametersForm />
             </Grid.Column>
           </Grid.Row>
         </Grid>
+        </div>
         </>
       )
     }

@@ -6,12 +6,19 @@ class ResultsTable extends Component {
         <>
           <br/>
           <table>
+          <thead>
           <tr>
             <th style={ {fontSize:'24px', color:'green'} }>NET</th>
             <th></th>
             <th style={ {fontSize:'24px', color:'green'} }>0</th>
           </tr>
-          <br/>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <br/>
+              </td>
+            </tr>
             <tr style={{textAlign:'center'}}>
               <td>T3</td>
               <td></td>
@@ -32,13 +39,17 @@ class ResultsTable extends Component {
               <td></td>
               <td>1</td>
             </tr>
-            <br/>
+            <tr>
+              <td>
+                <br/>
+              </td>
+            </tr>
             <tr style={{textAlign:'center'}}>
               <td>Total</td>
               <td></td>
               <td>8</td>
             </tr>
-
+            </tbody>
           </table>
           </>
       )

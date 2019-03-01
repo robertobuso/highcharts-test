@@ -1,32 +1,11 @@
-*,
-*::before,
-*::after { box-sizing: border-box; }
 
-body {
-  width: 100%;
-}
+.app-wrapper {
 
-.top-row {
-  height: 75%;
-}
-
-.bottom-row {
-  height: 25%;
 }
 
 .input-scroll {
   overflow: scroll;
   font-size: 15px;
-
-}
-
-.input-no-scroll {
-  font-size: 9px;
-  height: 75%;
-}
-
-.chart-and-results {
-  width: 10vw;
 }
 
 .parameter-form {
