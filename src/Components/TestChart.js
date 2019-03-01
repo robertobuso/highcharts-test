@@ -47,6 +47,10 @@ const options = {
             timezone: 'America/New_York'
        },
 
+       exporting: {
+         enabled: false
+       },
+
       series: [
               { type: 'candlestick',
                 name: 'Gold',

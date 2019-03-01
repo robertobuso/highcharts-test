@@ -39,6 +39,7 @@ const options = {
     xAxis: {
         categories: [],
         labels: {
+            enabled: false,
             skew3d: true,
             style: {
                 fontSize: '16px'
@@ -50,8 +51,11 @@ const options = {
         allowDecimals: true,
         min: 0,
         title: {
-            text: 'Positions Closed',
+            text: '',
             skew3d: true
+        },
+        labels: {
+          enabled: false
         }
     },
 
@@ -69,8 +73,13 @@ const options = {
        }
     },
 
+    exporting: {
+       enabled: false
+   },
+
     series: [
               {dataLabels: {
+                enabled: true,
                 align: 'center',
                 format: '({point.name})'
                 }
