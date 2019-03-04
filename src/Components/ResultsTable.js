@@ -10,7 +10,7 @@ class ResultsTable extends Component {
           <tr>
             <th style={ {fontSize:'24px', color:'green'} }>NET</th>
             <th></th>
-            <th style={ {fontSize:'24px', color:'green'} }>0</th>
+            <th style={ {fontSize:'24px', color:'green'} }>1</th>
           </tr>
           </thead>
           <tbody>

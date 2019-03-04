@@ -245,9 +245,10 @@ placeholder='2'
 
 <Grid.Row className='row-parameter'>
 <Grid.Column width={4} textAlign='right' style={ {fontWeight: 'bold'} }>
- Wiggle Room:
+ Entry Price:
 </Grid.Column>
 <Grid.Column width={11}>
+<label>Ceiling of Zone plus </label>
 <input
 name='zoneAttractorsDistance'
 type='text'
@@ -258,11 +259,41 @@ placeholder='1'
 />
 <label className='right-label'>percent of the Average True Range - Demand Zone</label>
 <br className='second-parameter'/>
+<label>Floor of Zone minus </label>
 <input
 name='zoneAttractorsDistance'
 type='text'
 className='number-input'
 placeholder='1'
+// value={this.state.numberOfGuests}
+// onChange={this.handleInputChange}
+/>
+<label className='right-label'>percent of the Average True Range - Supply Zone</label>
+</Grid.Column>
+</Grid.Row>
+
+<Grid.Row className='row-parameter'>
+<Grid.Column width={4} textAlign='right' style={ {fontWeight: 'bold'} }>
+ Stop Loss Price:
+</Grid.Column>
+<Grid.Column width={11}>
+<label>Floor of Zone minus </label>
+<input
+name='zoneAttractorsDistance'
+type='text'
+className='number-input'
+placeholder='2'
+// value={this.state.numberOfGuests}
+// onChange={this.handleInputChange}
+/>
+<label className='right-label'>percent of the Average True Range - Demand Zone</label>
+<br className='second-parameter'/>
+<label>Ceiling of Zone plus </label>
+<input
+name='zoneAttractorsDistance'
+type='text'
+className='number-input'
+placeholder='2'
 // value={this.state.numberOfGuests}
 // onChange={this.handleInputChange}
 />
