@@ -67,23 +67,6 @@ floated='left'
 
 <Grid.Row className='row-parameter'>
 <Grid.Column width={4} textAlign='right' style={ {fontWeight: 'bold'} }>
-Target Price:
-</Grid.Column>
-<Grid.Column width={11}>
-<input
-name='base'
-type='text'
-className='number-input'
-placeholder='3'
-floated='left'
-// onChange={this.handleInputChange}
-/>
-<label>{' times the vertical length of the Zone'}</label>
-</Grid.Column>
-</Grid.Row>
-
-<Grid.Row className='row-parameter'>
-<Grid.Column width={4} textAlign='right' style={ {fontWeight: 'bold'} }>
 Unused Zone:
 </Grid.Column>
 <Grid.Column width={11}>
@@ -240,6 +223,21 @@ placeholder='2'
 // onChange={this.handleInputChange}
 />
 <label className='right-label'>times or less the height of the Current Zone: distance between Zones</label>
+</Grid.Column>
+</Grid.Row><Grid.Row className='row-parameter'>
+<Grid.Column width={4} textAlign='right' style={ {fontWeight: 'bold'} }>
+Target Price:
+</Grid.Column>
+<Grid.Column width={11}>
+<input
+name='base'
+type='text'
+className='number-input'
+placeholder='3'
+floated='left'
+// onChange={this.handleInputChange}
+/>
+<label>{' times the vertical length of the Zone'}</label>
 </Grid.Column>
 </Grid.Row>
 

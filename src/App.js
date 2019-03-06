@@ -4,7 +4,7 @@ import './App.css';
 import { Grid, Menu } from 'semantic-ui-react'
 
 import CylinderChart from './Components/CylinderChart.js'
-import TestChart from './Components/TestChart.js'
+import EsChart from './Components/EsChart.js'
 import ParametersForm from './Components/ParametersForm.js'
 import ResultsTable from './Components/ResultsTable.js'
 
@@ -34,7 +34,7 @@ class App extends Component {
           <Grid.Row>
             <Grid columns={2}>
             <Grid.Column width={14} >
-              <TestChart />
+              <EsChart />
             </Grid.Column>
 
             <Grid.Column  width={2}>
