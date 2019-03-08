@@ -178,7 +178,8 @@ placeholder='40'
 // value={this.state.numberOfGuests}
 // onChange={this.handleInputChange}
 />
-<label className='right-label'>% or less penetration into Zone</label>
+<label className='right-label'>% or less penetration into Zone by Outgoing Bar</label>
+
 </Grid.Column>
 </Grid.Row>
 

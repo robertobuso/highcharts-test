@@ -19,9 +19,15 @@ while (esPrices.length > 1) {
     newArray.push(bar)
   }
 
-
 const finalData = newArray.map( bar => {
-  const dateTime = parseInt(moment(bar[0] + " " + bar[1]).tz('America/New_York').format('x'))
+  // data to moment object
+  const stringDateTime = moment.utc(bar[0] + " " + bar[1])
+  //moment object to local time zone
+  const localDate = moment(stringDateTime).local()
+  //moment object to iso format in local time zone
+  const formatDate = localDate.format("x")
+  //iso string to integer
+  const dateTime = parseInt(formatDate)
 
     return {"x": dateTime,
     "open": bar[2],
@@ -61,7 +67,7 @@ const options = {
 
       series: [
               { type: 'candlestick',
-                name: 'Gold',
+                name: 'E-Mini S&P 500',
                 data: finalData,
                 id: 'candlestick'
               },
@@ -133,7 +139,7 @@ const options = {
   }
       ],
       yAxis: {
-          min: 2470,
+          min: 2445,
           title: {
               text: 'Price'
           },
