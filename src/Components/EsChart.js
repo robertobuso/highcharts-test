@@ -19,6 +19,8 @@ while (esPrices.length > 1) {
     newArray.push(bar)
   }
 
+const actualBases = []
+
 const finalData = newArray.map( bar => {
   // data to moment object
   const stringDateTime = moment.utc(bar[0] + " " + bar[1])
@@ -29,12 +31,30 @@ const finalData = newArray.map( bar => {
   //iso string to integer
   const dateTime = parseInt(formatDate)
 
+  //Here we see if it's a bar or a leg
+    const candlestick = bar[5] - bar[2] > 0 ?
+        bar[5] - bar[2]
+    :
+      bar[2] - bar[5]
+
+
+    const range = bar[3] - bar[4]
+
+    if (candlestick / range < 0.4) {
+      actualBases.push(dateTime)
+    }
+
     return {"x": dateTime,
     "open": bar[2],
     "high": bar[3],
     "low": bar[4],
     "close": bar[5]}
   })
+
+  const baseMarkers = actualBases.map( base => {
+      return {'x': base,
+      'title': ' '}
+    })
 
 const options = {
       chart: {
@@ -73,23 +93,11 @@ const options = {
               },
               {
             type: 'flags',
-            data: [{
-                x: 1545123600000,
-                title: 'B'
-            }, {
-                x: 1545127200000,
-                title: 'B'
-            }, {
-                x: 1545130800000,
-                title: 'B'
-            }, {
-                x: 1545134400000,
-                title: 'B'
-            }],
+            data: baseMarkers,
             onSeries: 'candlestick',
            shape: 'circlepin',
-           width: 12,
-           fillColor: '#ADD8E6'
+           width: 1,
+           fillColor: 'blue'
           },
               {
   	type: 'columnrange',
@@ -106,34 +114,34 @@ const options = {
     opacity: 0.3,
     zIndex: -1,
     data: [{
-      x: 1545120000000,
-      low: 1249,
-      high: 1255,
+      x: 1546405200000,
+      low: 2461.5,
+      high: 2496.5,
     },
     {
-      x: 1545123600000,
-      low: 1249,
-      high: 1255,
+      x: 1546408800000,
+      low: 2461.5,
+      high: 2496.5,
     },
     {
-      x: 1545127200000,
-      low: 1249,
-      high: 1255,
+      x: 1546412400000,
+      low: 2461.5,
+      high: 2496.5,
     },
     {
-      x: 1545130800000,
-      low: 1249,
-      high: 1255,
+      x: 1546416000000,
+      low: 2461.5,
+      high: 2496.5,
     },
     {
-      x: 1545134400000,
-      low: 1249,
-      high: 1255,
+      x: 1546419600000,
+      low: 2461.5,
+      high: 2496.5,
     },
     {
-      x: 1545138000000,
-      low: 1249,
-      high: 1255,
+      x: 1546423200000,
+      low: 2461.5,
+      high: 2496.5,
     }],
     pointRange: 3600000
   }
@@ -146,18 +154,20 @@ const options = {
           plotLines: [{
             color: 'blue',
             width: 1,
-            value: 1255
+            value: 2496.5
           }, {
             color: 'blue',
             width: 1,
-            value: 1249
+            value: 2461.5
           }
         ]
       }
       }
 
       class EsChart extends Component {
+
           render() {
+            console.log(this.state)
             return (
                <div>
                 <HighchartsReact
