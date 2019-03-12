@@ -10,6 +10,10 @@ while (esPrices.length > 1) {
 
 export const actualBases = []
 
+let firstLeg = false
+let potentialZone = []
+const arrayOfZones =[]
+
 export const finalData = newArray.map( bar => {
   // data to moment object
   const stringDateTime = moment.utc(bar[0] + " " + bar[1])
@@ -30,12 +34,35 @@ export const finalData = newArray.map( bar => {
       actualBases.push(dateTime)
     }
 
+  //Find first leg
+  const idx = newArray.indexOf(bar)
+
+  if (firstLeg === false && candlestick / range >= 0.4) {
+    firstLeg = true
+    potentialZone.push(bar)
+    console.log('First Leg: ', bar)
+  } else if (candlestick / range >= 0.4 && potentialZone.length === 1) {
+    potentialZone.push(bar)
+    console.log ('Found a second Leg: ', potentialZone)
+  } else if (candlestick / range >= 0.4 && potentialZone.length > 1) {
+    potentialZone.push(bar)
+    arrayOfZones.push(potentialZone)
+    firstLeg = false
+    potentialZone = []
+    console.log('Time to Check if its a Good Zone!', arrayOfZones)
+  } else {
+    potentialZone.push(bar)
+    console.log('This is a base: ', candlestick / range)
+  }
+
     return {"x": dateTime,
     "open": bar[2],
     "high": bar[3],
     "low": bar[4],
     "close": bar[5]}
   })
+
+  export const finalPotentialZones = arrayOfZones
 
   export const baseMarkers = actualBases.map( base => {
       return {'x': base,

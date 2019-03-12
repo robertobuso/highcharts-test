@@ -16,7 +16,6 @@ class App extends Component {
     }
 
     handleChartClick = () => {
-      console.log('CHART CLICK!')
       this.setState( {
         newWindow: true
       })

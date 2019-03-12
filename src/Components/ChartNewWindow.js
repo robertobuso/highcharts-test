@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Highcharts from 'highcharts/highstock';
 
-import {actualBases, finalData, baseMarkers, optionsTwo } from '../Adapters'
+import {optionsTwo} from '../Adapters'
 
 import HighchartsReact from '../HighchartsReact.js'
 
@@ -18,7 +18,6 @@ require('highcharts/highcharts-more.src.js')(Highcharts)
 class ChartNewWindow extends Component {
 
     render() {
-      console.log(this.state)
       return (
         <NewWindow>
          <div>

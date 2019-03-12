@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Highcharts from 'highcharts/highstock';
 
-import {actualBases, finalData, baseMarkers, options } from '../Adapters'
+import {options, finalPotentialZones} from '../Adapters'
 
 import HighchartsReact from '../HighchartsReact.js'
 
@@ -16,7 +16,7 @@ require('highcharts/highcharts-more.src.js')(Highcharts)
 class EsChart extends Component {
 
     render() {
-      console.log(this.state)
+      console.log('finalPotentialZones: ', finalPotentialZones)
       return (
          <div onClick={this.props.handleChartClick}>
           <HighchartsReact
