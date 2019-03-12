@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Highcharts from 'highcharts/highstock';
 
-import {actualBases, finalData, baseMarkers, options } from '../Adapters'
+import {actualBases, finalData, baseMarkers, optionsTwo } from '../Adapters'
 
 import HighchartsReact from '../HighchartsReact.js'
 
@@ -15,9 +15,7 @@ require('highcharts/modules/xrange')(Highcharts)
 require('highcharts/highcharts-more.src.js')(Highcharts)
 
 
-
-
-class EsChart extends Component {
+class ChartNewWindow extends Component {
 
     render() {
       console.log(this.state)
@@ -27,7 +25,7 @@ class EsChart extends Component {
           <HighchartsReact
             highcharts={Highcharts}
             constructorType={'stockChart'}
-            options={options}
+            options={optionsTwo}
           />
         </div>
         </NewWindow>
@@ -35,4 +33,4 @@ class EsChart extends Component {
     }
 }
 
-export default EsChart;
+export default ChartNewWindow;

@@ -18,7 +18,7 @@ class EsChart extends Component {
     render() {
       console.log(this.state)
       return (
-         <div>
+         <div onClick={this.props.handleChartClick}>
           <HighchartsReact
             highcharts={Highcharts}
             constructorType={'stockChart'}

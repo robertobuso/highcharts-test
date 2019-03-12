@@ -5,10 +5,23 @@ import { Grid, Menu } from 'semantic-ui-react'
 
 import CylinderChart from './Components/CylinderChart.js'
 import EsChart from './Components/EsChart.js'
+import ChartNewWindow from './Components/ChartNewWindow.js'
 import ParametersForm from './Components/ParametersForm.js'
 import ResultsTable from './Components/ResultsTable.js'
 
 class App extends Component {
+
+    state = {
+      newWindow: false
+    }
+
+    handleChartClick = () => {
+      console.log('CHART CLICK!')
+      this.setState( {
+        newWindow: true
+      })
+    }
+
     render() {
       return (
         <>
@@ -29,12 +42,18 @@ class App extends Component {
          active={false}
        />
      </Menu>
+
+     {this.state.newWindow === true ?
+       <ChartNewWindow />
+      : null}
+
      <div>
         <Grid style={{height: '100%'}}>
           <Grid.Row>
             <Grid columns={2}>
             <Grid.Column width={14} >
-              <EsChart />
+              <EsChart
+                handleChartClick={this.handleChartClick}/>
             </Grid.Column>
 
             <Grid.Column  width={2}>

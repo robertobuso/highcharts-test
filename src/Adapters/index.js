@@ -152,3 +152,115 @@ export const options = {
         ]
       }
       }
+
+      export const optionsTwo = {
+            chart: {
+              height: '100%',
+              zoomType: 'xy',
+
+              xAxis: {
+                minRange: 3600000
+              },
+              type: 'candlestick'
+            }
+      ,        plotOptions: {
+                 candlestick: {
+                            color: 'red',
+                            upColor: 'green'
+                        }
+              },
+
+              rangeSelector: {
+                  enabled: false
+              },
+
+              title: {
+                  text: 'Envoy LLC Backtesting App'
+              },
+
+             time: {
+                  timezone: 'America/New_York'
+             },
+
+             exporting: {
+               enabled: false
+             },
+
+            series: [
+                    { type: 'candlestick',
+                      name: 'E-Mini S&P 500',
+                      data: finalData,
+                      id: 'candlestick'
+                    },
+                    {
+                  type: 'flags',
+                  data: baseMarkers,
+                  onSeries: 'candlestick',
+                 shape: 'circlepin',
+                 width: 1,
+                 fillColor: 'blue'
+                },
+                    {
+        	type: 'columnrange',
+          name: '',
+          id: 'zone',
+          grouping: false,
+          groupPadding: true,
+          pointPadding: 1,
+          borderRadius: 0,
+          showInLegend: false,
+          borderColor: '',
+          borderWidth: 2,
+          color: 'orange',
+          opacity: 0.3,
+          zIndex: -1,
+          data: [{
+            x: 1546405200000,
+            low: 2461.5,
+            high: 2496.5,
+          },
+          {
+            x: 1546408800000,
+            low: 2461.5,
+            high: 2496.5,
+          },
+          {
+            x: 1546412400000,
+            low: 2461.5,
+            high: 2496.5,
+          },
+          {
+            x: 1546416000000,
+            low: 2461.5,
+            high: 2496.5,
+          },
+          {
+            x: 1546419600000,
+            low: 2461.5,
+            high: 2496.5,
+          },
+          {
+            x: 1546423200000,
+            low: 2461.5,
+            high: 2496.5,
+          }],
+          pointRange: 3600000
+        }
+            ],
+            yAxis: {
+                min: 2445,
+                title: {
+                    text: 'Price'
+                },
+                plotLines: [{
+                  color: 'blue',
+                  width: 1,
+                  value: 2496.5
+                }, {
+                  color: 'blue',
+                  width: 1,
+                  value: 2461.5
+                }
+              ]
+            }
+            }

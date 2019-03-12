@@ -1,3 +1,6 @@
+body {
+  height: 100%;
+}
 
 .app-wrapper {
 
@@ -71,4 +74,17 @@
 
 .row-parameter {
   /* height: 55px; */
+}
+
+.modal {
+    position: fixed;
+    width: 1000px;
+    height: 485px !important;
+    top: 0px;
+    left: 0;
+    background: rgba(0, 0, 0, 0.7);
+}
+.modal  #moodcontainer{
+    height: 485px;
+
 }
