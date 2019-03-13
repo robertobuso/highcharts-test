@@ -12,7 +12,11 @@ export const actualBases = []
 
 let firstLeg = false
 let potentialZone = []
+let zoneCeiling = 0
+let zoneFloor = newArray[0][4]
 const arrayOfZones =[]
+let candlestick = 0
+let formation = ''
 
 export const finalData = newArray.map( bar => {
   // data to moment object
@@ -24,36 +28,52 @@ export const finalData = newArray.map( bar => {
   //iso string to integer
   const dateTime = parseInt(formatDate)
 
-  //Here we see if it's a bar or a leg
-    const candlestick = bar[5] - bar[2] > 0 ?
-        bar[5] - bar[2] : bar[2] - bar[5]
+    //Here we see if it's a drop or a rally
+    if (bar[5] - bar[2] > 0) {
+      candlestick = bar[5] - bar[2]
+      formation = 'rally'
+    } else {
+      candlestick = bar[2] - bar[5]
+      formation = 'drop'
+    }
 
     const range = bar[3] - bar[4]
 
+  //Here we see if it's a bar or a leg
     if (candlestick / range < 0.4) {
       actualBases.push(dateTime)
     }
 
-  //Find first leg
   const idx = newArray.indexOf(bar)
 
+  //If there is no Potential Zone open, is this a first leg?
   if (firstLeg === false && candlestick / range >= 0.4) {
     firstLeg = true
     potentialZone.push(bar)
     console.log('First Leg: ', bar)
-  } else if (candlestick / range >= 0.4 && potentialZone.length === 1) {
-    potentialZone.push(bar)
-    console.log ('Found a second Leg: ', potentialZone)
-  } else if (candlestick / range >= 0.4 && potentialZone.length > 1) {
-    potentialZone.push(bar)
-    arrayOfZones.push(potentialZone)
-    firstLeg = false
-    potentialZone = []
-    console.log('Time to Check if its a Good Zone!', arrayOfZones)
-  } else {
-    potentialZone.push(bar)
-    console.log('This is a base: ', candlestick / range)
   }
+  //Here we set ceiling of Zone based on the current bar as Rally
+  else if (formation === 'rally' && bar[5] > zoneCeiling) {
+    zoneCeiling = bar[5]
+  }
+  //Here we set ceiling of Zone based on the current bar as Drop
+  else if (formation === 'drop' && bar[3] > zoneCeiling) {
+    zoneCeiling = bar[3]
+  }
+  //Here we set floor of Zone based on the current bar as Rally
+  else if (formation === 'rally' && bar[4] < zoneFloor) {
+    zoneFloor = bar[4]
+  }
+  //Here we set floor of Zone based on the current bar as Drop
+  else if (formation === 'drop' && bar[5] < zoneFloor) {
+    zoneFloor = bar[5]
+  }
+
+  console.log('sizeOfZone: ', zoneCeiling - zoneFloor)
+
+  //Check to see if bar is explosive
+
+
 
     return {"x": dateTime,
     "open": bar[2],
