@@ -8,6 +8,19 @@ while (esPrices.length > 1) {
     newArray.push(bar)
   }
 
+  const createDateTime = (bar) => {
+    // data to moment object
+    const stringDateTime = moment.utc(bar[0] + " " + bar[1])
+    //moment object to local time zone
+    const localDate = moment(stringDateTime).local()
+    //moment object to iso format in local time zone
+    const formatDate = localDate.format("x")
+    //iso string to integer
+    const dateTime = parseInt(formatDate)
+
+    return dateTime
+  }
+
 export const actualBases = []
 
 let firstLeg = false
@@ -16,13 +29,13 @@ let distinctPotentialZone = []
 const arrayOfZones =[]
 let candlestick = 0
 let formation = ''
-let numberOfBasesAfterLeg = 0
 let zoneCeiling
 let zoneFloor
-let range
+let zoneHeight
 let distanceFromDemandZone
 let distanceFromSupplyZone
 let firstBarIsLeg = false
+let zoneData = []
 
 //Set initial ceiling and floor based on direction of first bar
   if (newArray[0][5] - newArray[0][2] >= 0) {
@@ -139,14 +152,12 @@ export const finalData = newArray.map( bar => {
     potentialZone = []
     let firstPotentialLeg
     let i = idx - 2
-        console.log('IDX: ', idx)
 
     //Is there an Incoming Leg?
     if (idx > 6) {firstPotentialLeg = idx - 6} else {firstPotentialLeg = 0}
 
     while ( i >= firstPotentialLeg) {
       if (isItALeg(newArray[i])) {
-        console.log('We have an incoming leg!', newArray[i])
 
         //Is it a rally or a drop?
         if (newArray[idx][5] - newArray[idx][2] > 0) {
@@ -162,9 +173,9 @@ export const finalData = newArray.map( bar => {
         potentialZone.push(newArray[z])
       }
 
-console.log('Bases Inside Potential Zone', potentialZone)
-console.log('Formation: ', formation)
-console.log('Outgoing Leg: ', newArray[idx])
+      //Check to see if there are more than 5 bars in a row after Initial Leg
+      if (potentialZone.length <= 5) {
+
         let highest = potentialZone.map( bar => bar[3])
         let lowest = potentialZone.map( bar => bar[4])
         let closing = potentialZone.map( bar => bar[5])
@@ -184,52 +195,55 @@ console.log('Outgoing Leg: ', newArray[idx])
           zoneFloor = Math.min(...closing)
         }
 
-        //Check to see if bar is explosive in a Rally
+        //Check to see if bar is explosive in a Rally and less than 40% inside the Zone
         distanceFromDemandZone = bar[5] - zoneCeiling
+        zoneHeight = zoneCeiling-zoneFloor
 
-        if (formation === 'rally' && distanceFromDemandZone >= zoneCeiling-zoneFloor) {
+        if (formation === 'rally' && distanceFromDemandZone >= zoneHeight && (zoneCeiling === bar[2] || ((zoneCeiling-bar[2]/zoneHeight) <= 0.4)) ) {
           arrayOfZones.push(potentialZone)
+
+          //Set data to draw Zone in chart
+          zoneData.push(potentialZone.map( bar => {return {'x': createDateTime(bar), 'high': zoneCeiling, 'low':  zoneFloor}}))
+
           zoneCeiling = undefined
           zoneFloor = undefined
-          console.log('This is a Potential Demand Zone', distanceFromDemandZone)
+
+          console.log('This is a Potential Demand Zone', potentialZone)
+          console.log('Incoming Leg: ', newArray[i])
           console.log('Explosive Leg: ', bar)
         }
 
-        //Check to see if bar is explosive in a Drop
+        //Check to see if bar is explosive in a Drop and less than 40% inside the Zone
         distanceFromSupplyZone = bar[5] - zoneFloor
-        if (formation === 'drop' && distanceFromSupplyZone <= zoneFloor-zoneCeiling) {
+        zoneHeight = zoneFloor-zoneCeiling
+
+        if (formation === 'drop' && distanceFromSupplyZone <= zoneHeight && (zoneFloor === bar[2] || ((bar[2]-zoneFloor/zoneHeight) <= 0.4)) ) {
           arrayOfZones.push(potentialZone)
+
+          //Set data to draw Zone in chart
+          zoneData.push(potentialZone.map( bar =>  {return {'x': createDateTime(bar), 'high': zoneCeiling, 'low':  zoneFloor}}))
+
           zoneCeiling = undefined
           zoneFloor = undefined
+
           console.log('This is a Potential Supply Zone', potentialZone)
+          console.log('Incoming Leg: ', newArray[i])
           console.log('Explosive Leg: ', bar)
         }
+        console.log('zoneData: ', zoneData)
         break
-      } else {
-      i = i - 1
+      } else if (potentialZone.length > 5) {
+        potentialZone = []
+        console.log('More than 5 bars after leg without an explosive leg. Start looking for a new Zone!')
+        break
       }
+    } else {
+      i = i - 1
     }
+  }
+}
 }
 
-  //If the bar is a base after an Initial Leg, include it in the Potential Zone
-  else if (firstLeg === true && candlestick / range < 0.4){
-    potentialZone.push(bar)
-    console.log('This is a base: ', candlestick / range)
-  }
-  //If the bar is a leg-base after an Initial Leg, include it in the Potential Zone
-  else if (firstLeg === true && candlestick / range >= 0.4){
-    potentialZone.push(bar)
-    console.log('This is a leg-base: ', candlestick / range)
-  }
-
-  //Check to see if there are more than 6 bars in a row after Initial Leg
-  if (potentialZone.length > 5) {
-    firstLeg = false
-    potentialZone = []
-    console.log('More than 5 bars after leg without an explosive leg. Start looking for a new Zone!')
-  }
-
-}
     return {"x": dateTime,
     "open": bar[2],
     "high": bar[3],
@@ -304,36 +318,7 @@ export const options = {
     color: 'orange',
     opacity: 0.3,
     zIndex: -1,
-    data: [{
-      x: 1546405200000,
-      low: 2461.5,
-      high: 2496.5,
-    },
-    {
-      x: 1546408800000,
-      low: 2461.5,
-      high: 2496.5,
-    },
-    {
-      x: 1546412400000,
-      low: 2461.5,
-      high: 2496.5,
-    },
-    {
-      x: 1546416000000,
-      low: 2461.5,
-      high: 2496.5,
-    },
-    {
-      x: 1546419600000,
-      low: 2461.5,
-      high: 2496.5,
-    },
-    {
-      x: 1546423200000,
-      low: 2461.5,
-      high: 2496.5,
-    }],
+    data: zoneData.flat(),
     pointRange: 3600000
   }
       ],
