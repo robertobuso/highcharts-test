@@ -12,11 +12,26 @@ export const actualBases = []
 
 let firstLeg = false
 let potentialZone = []
-let zoneCeiling = 0
-let zoneFloor = newArray[0][4]
+let distinctPotentialZone = []
 const arrayOfZones =[]
 let candlestick = 0
 let formation = ''
+let numberOfBasesAfterLeg = 0
+let zoneCeiling
+let zoneFloor
+let range
+let distanceFromDemandZone
+let distanceFromSupplyZone
+let firstBarIsLeg = false
+
+//Set initial ceiling and floor based on direction of first bar
+  if (newArray[0][5] - newArray[0][2] >= 0) {
+    zoneCeiling = newArray[0][5]
+    zoneFloor = newArray[0][4]
+  } else {
+    zoneCeiling = newArray[0][3]
+    zoneFloor = newArray[0][5]
+  }
 
 export const finalData = newArray.map( bar => {
   // data to moment object
@@ -27,6 +42,8 @@ export const finalData = newArray.map( bar => {
   const formatDate = localDate.format("x")
   //iso string to integer
   const dateTime = parseInt(formatDate)
+  //set index of bar inside data array
+  const idx = newArray.indexOf(bar)
 
     //Here we see if it's a drop or a rally
     if (bar[5] - bar[2] > 0) {
@@ -37,23 +54,72 @@ export const finalData = newArray.map( bar => {
       formation = 'drop'
     }
 
-    const range = bar[3] - bar[4]
+    range = bar[3] - bar[4]
 
   //Here we see if it's a bar or a leg
     if (candlestick / range < 0.4) {
       actualBases.push(dateTime)
     }
 
-  const idx = newArray.indexOf(bar)
-
-  //If there is no Potential Zone open, is this a first leg?
-  if (firstLeg === false && candlestick / range >= 0.4) {
-    firstLeg = true
-    potentialZone.push(bar)
-    console.log('First Leg: ', bar)
+  //Check first three bars
+  if (idx < 3) {
+  //Set candlestick and range of first Bar
+  if (newArray[0][5] - newArray[0][2] > 0) {
+    candlestick = newArray[0][5] - newArray[0][2]
+    formation = 'rally'
+  } else {
+    candlestick = newArray[0][2] - newArray[0][5]
+    formation = 'drop'
   }
+
+  range = newArray[0][3] - newArray[0][4]
+
+//Here we see if first Bar is a Base or a Leg
+  if ((candlestick / range) >= 0.4) {
+    firstBarIsLeg = true
+  }
+
+  //Set rally or drop, ceiling and floor based on third bar
+  if (newArray[2][5] - newArray[2][2] > 0) {
+    candlestick = newArray[2][5] - newArray[2][2]
+    formation = 'rally'
+    zoneCeiling = newArray[1][5]
+    zoneFloor = newArray[1][4]
+  } else {
+    candlestick = newArray[2][2] - newArray[2][5]
+    formation = 'drop'
+    zoneCeiling = newArray[1][3]
+    zoneFloor = newArray[1][5]
+  }
+
+  //Is the third bar explosive in a Rally and the first bar is a Leg?
+  distanceFromDemandZone = newArray[2][5] - zoneCeiling
+  if (formation === 'rally' && distanceFromDemandZone >= zoneCeiling-zoneFloor && firstBarIsLeg === true ) {
+    potentialZone.push(bar)
+    distinctPotentialZone = [...new Set(potentialZone)]
+    arrayOfZones.push(distinctPotentialZone)
+    firstLeg = false
+    potentialZone = []
+    console.log('This is a Potential Demand Zone', distanceFromDemandZone)
+    console.log('Explosive Leg: ', bar)
+  }
+
+  //Is the third bar explosive in a Drop and the first bar is a Leg?
+  distanceFromSupplyZone = zoneFloor - newArray[2][5]
+  if (formation === 'drop' && distanceFromSupplyZone >= zoneCeiling-zoneFloor && firstBarIsLeg === true) {
+    potentialZone.push(bar)
+    arrayOfZones.push(potentialZone)
+    firstLeg = false
+    potentialZone = []
+    console.log('This is a Potential Supply Zone', distanceFromSupplyZone)
+    console.log('Explosive Leg: ', bar)
+  }
+} else {
+
+  //After the third Bar, start looking back in time
+
   //Here we set ceiling of Zone based on the current bar as Rally
-  else if (formation === 'rally' && bar[5] > zoneCeiling) {
+  if (formation === 'rally' && bar[5] > zoneCeiling) {
     zoneCeiling = bar[5]
   }
   //Here we set ceiling of Zone based on the current bar as Drop
@@ -69,12 +135,52 @@ export const finalData = newArray.map( bar => {
     zoneFloor = bar[5]
   }
 
-  console.log('sizeOfZone: ', zoneCeiling - zoneFloor)
+  //Check to see if bar is explosive in a Rally
+  distanceFromDemandZone = bar[5] - zoneCeiling
+  if (formation === 'rally' && distanceFromDemandZone >= zoneCeiling-zoneFloor) {
+    potentialZone.push(bar)
+    distinctPotentialZone = [...new Set(potentialZone)]
+    arrayOfZones.push(distinctPotentialZone)
+    firstLeg = false
+    potentialZone = []
+    zoneCeiling = undefined
+    zoneFloor = undefined
+    console.log('This is a Potential Demand Zone', distanceFromDemandZone)
+    console.log('Explosive Leg: ', bar)
+  }
 
-  //Check to see if bar is explosive
+  //Check to see if bar is explosive in a Drop
+  distanceFromSupplyZone = zoneFloor - bar[5]
+  if (formation === 'drop' && distanceFromSupplyZone >= zoneCeiling-zoneFloor) {
+    potentialZone.push(bar)
+    arrayOfZones.push(potentialZone)
+    firstLeg = false
+    potentialZone = []
+    zoneCeiling = undefined
+    zoneFloor = undefined
+    console.log('This is a Potential Supply Zone', distanceFromSupplyZone)
+    console.log('Explosive Leg: ', bar)
+  }
 
+  //If the bar is a base after an Initial Leg, include it in the Potential Zone
+  else if (firstLeg === true && candlestick / range < 0.4){
+    potentialZone.push(bar)
+    console.log('This is a base: ', candlestick / range)
+  }
+  //If the bar is a leg-base after an Initial Leg, include it in the Potential Zone
+  else if (firstLeg === true && candlestick / range >= 0.4){
+    potentialZone.push(bar)
+    console.log('This is a leg-base: ', candlestick / range)
+  }
 
+  //Check to see if there are more than 6 bars in a row after Initial Leg
+  if (potentialZone.length > 5) {
+    firstLeg = false
+    potentialZone = []
+    console.log('More than 5 bars after leg without an explosive leg. Start looking for a new Zone!')
+  }
 
+}
     return {"x": dateTime,
     "open": bar[2],
     "high": bar[3],
@@ -183,7 +289,7 @@ export const options = {
   }
       ],
       yAxis: {
-          min: 2445,
+          min: 2595,
           title: {
               text: 'Price'
           },
