@@ -136,6 +136,7 @@ export const finalData = newArray.map( bar => {
 
 //Is it a leg?
   if (idx >= 3 && isItALeg(bar)) {
+    potentialZone = []
     let firstPotentialLeg
     let i = idx - 2
         console.log('IDX: ', idx)
@@ -146,29 +147,47 @@ export const finalData = newArray.map( bar => {
     while ( i >= firstPotentialLeg) {
       if (isItALeg(newArray[i])) {
         console.log('We have an incoming leg!', newArray[i])
-        //Here we set ceiling of Zone based on the current bar as Rally
-        if (formation === 'rally' && (bar[5] > zoneCeiling || zoneCeiling === undefined)) {
-          zoneCeiling = bar[5]
+
+        //Is it a rally or a drop?
+        if (newArray[idx][5] - newArray[idx][2] > 0) {
+          candlestick = newArray[idx][5] - newArray[idx][2]
+          formation = 'rally'
+        } else {
+          candlestick = newArray[idx][2] - newArray[idx][5]
+          formation = 'drop'
         }
-        //Here we set ceiling of Zone based on the current bar as Drop
-        else if (formation === 'drop' && (bar[3] > zoneCeiling || zoneCeiling === undefined)) {
-          zoneCeiling = bar[3]
+
+      //Create Potential Zone array
+      for (let z = i + 1; z < idx; z++) {
+        potentialZone.push(newArray[z])
+      }
+
+console.log('Bases Inside Potential Zone', potentialZone)
+console.log('Formation: ', formation)
+console.log('Outgoing Leg: ', newArray[idx])
+        let highest = potentialZone.map( bar => bar[3])
+        let lowest = potentialZone.map( bar => bar[4])
+        let closing = potentialZone.map( bar => bar[5])
+
+        //Here we set ceiling and floor of Zone based for Rally
+        if (potentialZone.length === 1) {
+          zoneCeiling = Math.max(...highest)
+          zoneFloor = Math.min(...lowest)
         }
-        //Here we set floor of Zone based on the current bar as Rally
-        else if (formation === 'rally' && (bar[4] < zoneFloor || zoneFloor === undefined)) {
-          zoneFloor = bar[4]
+        else if (formation === 'rally') {
+          zoneCeiling = Math.max(...closing)
+          zoneFloor = Math.min(...lowest)
         }
-        //Here we set floor of Zone based on the current bar as Drop
-        else if (formation === 'drop' && (bar[5] < zoneFloor || zoneFloor === undefined)) {
-          zoneFloor = bar[5]
+        //Here we set ceiling and floor of Zone for Drop
+        else if (formation === 'drop') {
+          zoneCeiling = Math.max(...highest)
+          zoneFloor = Math.min(...closing)
         }
 
         //Check to see if bar is explosive in a Rally
         distanceFromDemandZone = bar[5] - zoneCeiling
+
         if (formation === 'rally' && distanceFromDemandZone >= zoneCeiling-zoneFloor) {
-          for (let z = i; z <= idx; z++) {
-            potentialZone.push(newArray[z])
-          }
           arrayOfZones.push(potentialZone)
           zoneCeiling = undefined
           zoneFloor = undefined
@@ -177,11 +196,8 @@ export const finalData = newArray.map( bar => {
         }
 
         //Check to see if bar is explosive in a Drop
-        distanceFromSupplyZone = zoneFloor - bar[5]
-        if (formation === 'drop' && distanceFromSupplyZone >= zoneFloor-zoneCeiling) {
-          for (let z = i; z <= idx; z++) {
-            potentialZone.push(newArray[z])
-          }
+        distanceFromSupplyZone = bar[5] - zoneFloor
+        if (formation === 'drop' && distanceFromSupplyZone <= zoneFloor-zoneCeiling) {
           arrayOfZones.push(potentialZone)
           zoneCeiling = undefined
           zoneFloor = undefined
