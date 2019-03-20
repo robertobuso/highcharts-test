@@ -40,6 +40,9 @@ let explosiveGroup = []
 let groupDistanceFromSupplyZone
 let lowestPriceArray
 let lowestPriceInExplosiveGroup
+let highestPriceArray
+let highestPriceInExplosiveGroup
+let groupDistanceFromDemandZone
 
 //Set initial ceiling and floor based on direction of first bar
   if (newArray[0][5] - newArray[0][2] >= 0) {
@@ -206,10 +209,13 @@ export const finalData = newArray.map( bar => {
         }
 
         //Check to see if bar is explosive in a Rally and less than 40% inside the Zone or if the 4 bars form an explosive group
+        highestPriceArray = explosiveGroup.map(bar => bar ? bar[3] : null)
+        highestPriceInExplosiveGroup = Math.max(...highestPriceArray)
         barDistanceFromDemandZone = bar[5] - zoneCeiling
+        groupDistanceFromDemandZone =  highestPriceInExplosiveGroup - zoneCeiling
         zoneHeight = zoneCeiling-zoneFloor
 
-        if (formation === 'rally' && barDistanceFromDemandZone >= zoneHeight && (zoneCeiling === bar[2] || (((zoneCeiling-bar[2])/zoneHeight) <= 0.4)) ) {
+        if (formation === 'rally' && (zoneCeiling === bar[2] || (((zoneCeiling-bar[2])/zoneHeight) <= 0.4)) && (barDistanceFromDemandZone >= zoneHeight || groupDistanceFromDemandZone >= (zoneHeight * 2))  ) {
           arrayOfZones.push(potentialZone)
 
           //Set data to draw Zone in chart
