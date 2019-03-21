@@ -57,10 +57,8 @@ const isItALeg = (bar) => {
 
   if (bar[5] - bar[2] > 0) {
     candlestick = bar[5] - bar[2]
-    formation = 'rally'
   } else {
     candlestick = bar[2] - bar[5]
-    formation = 'drop'
   }
 
   let range = bar[3] - bar[4]
@@ -156,6 +154,7 @@ export const finalData = newArray.map( bar => {
     potentialZone = []
     let firstPotentialLeg
     let i = idx - 2
+    let zoneInvalidatedByLegBases = false
 
     //Is there an Incoming Leg?
     if (idx > 6) {firstPotentialLeg = idx - 6} else {firstPotentialLeg = 0}
@@ -164,12 +163,14 @@ export const finalData = newArray.map( bar => {
       if (isItALeg(newArray[i])) {
 
         //Is it a rally or a drop?
-        if (newArray[idx][5] - newArray[idx][2] > 0) {
+        if (newArray[idx][5] - newArray[idx][2] >= 0) {
           candlestick = newArray[idx][5] - newArray[idx][2]
           formation = 'rally'
+          console.log('This formation is set as RALLY in 171')
         } else {
           candlestick = newArray[idx][2] - newArray[idx][5]
           formation = 'drop'
+          console.log('This formation is set as DROP in 175')
         }
 
       //Create Potential Zone array
@@ -209,6 +210,8 @@ export const finalData = newArray.map( bar => {
         let zoneInvalidatedByLegBases = false
         let numberOfLegs = 0
 
+        console.log('The Zone is set: ', potentialZone)
+
         for (let index = 0; index < potentialZone.length; index++) {
           if (isItALeg(potentialZone[index])) {
             //Count it as a Leg-Base
@@ -245,7 +248,7 @@ export const finalData = newArray.map( bar => {
             }
           }
         }
-
+        console.log('Was Zone Invalidated by Leg Bases? ', zoneInvalidatedByLegBases)
         if (zoneInvalidatedByLegBases === false) {
         //Check to see if bar is explosive in a Rally and less than 40% inside the Zone or if the 4 bars form an explosive group
         highestPriceArray = explosiveGroup.map(bar => bar ? bar[3] : null)
@@ -253,6 +256,17 @@ export const finalData = newArray.map( bar => {
         barDistanceFromDemandZone = bar[5] - zoneCeiling
         groupDistanceFromDemandZone =  highestPriceInExplosiveGroup - zoneCeiling
         zoneHeight = zoneCeiling-zoneFloor
+
+        if(formation === 'rally') {
+          console.log('highestPriceArray: ', highestPriceArray)
+          console.log('highestPriceInExplosiveGroup: ', highestPriceInExplosiveGroup)
+          console.log('barDistanceFromDemandZone: ', barDistanceFromDemandZone)
+          console.log('groupDistanceFromDemandZone: ', groupDistanceFromDemandZone)
+          console.log('zoneHeight: ', zoneHeight)
+          console.log('bar: ', newArray[idx])
+          console.log('Needs to be positive: ', newArray[idx][5] - newArray[idx][2])
+          console.log('Formation: ', formation)
+        }
 
         if (formation === 'rally' && (zoneCeiling === bar[2] || (((zoneCeiling-bar[2])/zoneHeight) <= 0.4)) && (barDistanceFromDemandZone >= zoneHeight || groupDistanceFromDemandZone >= (zoneHeight * 2))  ) {
           arrayOfZones.push(potentialZone)
@@ -265,6 +279,8 @@ export const finalData = newArray.map( bar => {
           console.log('Explosive Leg: ', bar)
           console.log('Zone Ceiling: ', zoneCeiling)
           console.log('Zone Floor: ', zoneFloor)
+          console.log(i, idx)
+          console.log('Formation: ', formation)
 
           zoneCeiling = undefined
           zoneFloor = undefined
@@ -277,24 +293,30 @@ export const finalData = newArray.map( bar => {
         groupDistanceFromSupplyZone =  lowestPriceInExplosiveGroup - zoneFloor
         zoneHeight = zoneFloor-zoneCeiling
 
+
+                if(formation === 'drop') {
+                  console.log('lowestPriceArray: ', lowestPriceArray)
+                  console.log('lowestPriceInExplosiveGroup: ', lowestPriceInExplosiveGroup)
+                  console.log('barDistanceFromSupplyZone: ', barDistanceFromSupplyZone)
+                  console.log('groupDistanceFromSupplyZone: ', groupDistanceFromSupplyZone)
+                  console.log('zoneHeight: ', zoneHeight)
+                }
+
         if (formation === 'drop' && (zoneFloor === bar[2] || (((zoneFloor-bar[2])/zoneHeight) <= 0.4)) && (barDistanceFromSupplyZone <= zoneHeight || groupDistanceFromSupplyZone <= (zoneHeight * 2)) ) {
           arrayOfZones.push(potentialZone)
 
           //Set data to draw Zone in chart
           zoneData.push(potentialZone.map( bar => {return {'x': createDateTime(bar), 'high': zoneCeiling, 'low':  zoneFloor}}))
 
-          console.log('This is a Potential Demand Zone', potentialZone)
+          console.log('This is a Potential Supply Zone', potentialZone)
           console.log('Incoming Leg: ', newArray[i])
           console.log('Explosive Leg: ', bar)
           console.log('Zone Ceiling: ', zoneCeiling)
           console.log('Zone Floor: ', zoneFloor)
+          console.log(i, idx)
 
           zoneCeiling = undefined
           zoneFloor = undefined
-
-          console.log('This is a Potential Supply Zone', potentialZone)
-          console.log('Incoming Leg: ', newArray[i])
-          console.log('Explosive Leg: ', bar)
         }
         //Finished setting Potential Zone, leave loop to return data for chart below
         break
@@ -305,6 +327,7 @@ export const finalData = newArray.map( bar => {
           break
         }
       } else {
+        zoneInvalidatedByLegBases = false
         i = i - 1
       }
   }
