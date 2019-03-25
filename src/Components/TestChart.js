@@ -59,22 +59,10 @@ const options = {
               },
               {
             type: 'flags',
-            data: [{
-                x: 1545123600000,
-                title: 'B'
-            }, {
-                x: 1545127200000,
-                title: 'B'
-            }, {
-                x: 1545130800000,
-                title: 'B'
-            }, {
-                x: 1545134400000,
-                title: 'B'
-            }],
+            data: baseMarkers,
             onSeries: 'candlestick',
            shape: 'circlepin',
-           width: 12,
+           width: 1,
            fillColor: '#ADD8E6'
           },
               {
@@ -91,41 +79,13 @@ const options = {
     color: 'orange',
     opacity: 0.3,
     zIndex: -1,
-    data: [{
-      x: 1545120000000,
-      low: 1249,
-      high: 1255,
-    },
-    {
-      x: 1545123600000,
-      low: 1249,
-      high: 1255,
-    },
-    {
-      x: 1545127200000,
-      low: 1249,
-      high: 1255,
-    },
-    {
-      x: 1545130800000,
-      low: 1249,
-      high: 1255,
-    },
-    {
-      x: 1545134400000,
-      low: 1249,
-      high: 1255,
-    },
-    {
-      x: 1545138000000,
-      low: 1249,
-      high: 1255,
-    }],
+    data: zoneData.flat(),
     pointRange: 3600000
   }
       ],
       yAxis: {
-          min: 1240,
+          min: 2595,
+          tickInterval: 10,
           title: {
               text: 'Price'
           },

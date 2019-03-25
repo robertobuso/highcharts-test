@@ -16,7 +16,7 @@ require('highcharts/highcharts-more.src.js')(Highcharts)
 class EsChart extends Component {
 
     render() {
-      console.log('finalPotentialZones: ', finalPotentialZones)
+      console.log(finalPotentialZones)
       return (
          <div onClick={this.props.handleChartClick}>
           <HighchartsReact

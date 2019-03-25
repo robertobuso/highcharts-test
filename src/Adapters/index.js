@@ -44,6 +44,7 @@ let highestPriceInExplosiveGroup
 let groupDistanceFromDemandZone
 let demandAttractorZoneFound = false
 let supplyAttractorZoneFound = false
+let incomingCandlestick
 
 //Set initial ceiling and floor based on direction of first bar
   if (newArray[0][5] - newArray[0][2] >= 0) {
@@ -100,51 +101,41 @@ export const finalData = newArray.map( bar => {
 
   //Check first three bars
   if (idx < 3) {
-  //Set candlestick and range of first Bar
-  if (newArray[0][5] - newArray[0][2] > 0) {
-    candlestick = newArray[0][5] - newArray[0][2]
-    formation = 'rally'
-  } else {
-    candlestick = newArray[0][2] - newArray[0][5]
-    formation = 'drop'
-  }
 
-  range = newArray[0][3] - newArray[0][4]
-
-//Here we see if first Bar is a Base or a Leg
+//Check if first Bar is a Base or a Leg
   if (isItALeg(newArray[0])) {
   //Set rally or drop, ceiling and floor based on third bar
   if (newArray[2][5] - newArray[2][2] > 0) {
     candlestick = newArray[2][5] - newArray[2][2]
     formation = 'rally'
-    zoneCeiling = newArray[1][5]
+    zoneCeiling = newArray[1][3]
     zoneFloor = newArray[1][4]
   } else {
     candlestick = newArray[2][2] - newArray[2][5]
     formation = 'drop'
     zoneCeiling = newArray[1][3]
-    zoneFloor = newArray[1][5]
+    zoneFloor = newArray[1][4]
   }
 
   //Is the third bar explosive in a Rally and the first bar is a Leg?
-  barDistanceFromDemandZone = newArray[2][5] - zoneCeiling
-  if (formation === 'rally' && barDistanceFromDemandZone >= zoneCeiling-zoneFloor && firstBarIsLeg === true ) {
-    potentialZone.push(bar)
+  barDistanceFromDemandZone = newArray[2][3] - zoneCeiling
+  if (formation === 'rally' && barDistanceFromDemandZone >= zoneCeiling-zoneFloor) {
+    potentialZone.push(newArray[1])
     distinctPotentialZone = [...new Set(potentialZone)]
-    arrayOfZones.push(distinctPotentialZone)
+
+    arrayOfZones.push([ {'bases': distinctPotentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': ''}, {'incomingLeg': 0}, {'outgoingLeg': 3} ])
+
     potentialZone = []
-    console.log('This is a Potential Demand Zone', barDistanceFromDemandZone)
-    console.log('Explosive Leg: ', bar)
   }
 
   //Is the third bar explosive in a Drop and the first bar is a Leg?
-  barDistanceFromSupplyZone = zoneFloor - newArray[2][5]
-  if (formation === 'drop' && barDistanceFromSupplyZone >= zoneCeiling-zoneFloor && firstBarIsLeg === true) {
-    potentialZone.push(bar)
-    arrayOfZones.push(potentialZone)
+  barDistanceFromSupplyZone = zoneFloor - newArray[2][4]
+  if (formation === 'drop' && barDistanceFromSupplyZone >= zoneCeiling-zoneFloor) {
+    potentialZone.push(newArray[1])
+
+    arrayOfZones.push([ {'bases': distinctPotentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': ''}, {'incomingLeg': 0}, {'outgoingLeg': 3} ])
+
     potentialZone = []
-    console.log('This is a Potential Supply Zone', barDistanceFromSupplyZone)
-    console.log('Explosive Leg: ', bar)
   }
   }
 } else {
@@ -179,7 +170,7 @@ export const finalData = newArray.map( bar => {
       }
 
       //Check to see if there are more than 5 bars in a row after Initial Leg
-      if (potentialZone.length <= 5) {
+      if (potentialZone.length <= 6) {
 
         let highest = potentialZone.map( bar => bar[3])
         let lowest = potentialZone.map( bar => bar[4])
@@ -193,13 +184,34 @@ export const finalData = newArray.map( bar => {
         else if (formation === 'rally') {
           zoneCeiling = Math.max(...closing)
           zoneFloor = Math.min(...lowest)
+          zoneHeight = zoneCeiling - zoneFloor
         }
         //Set ceiling and floor of Zone for Drop
         else if (formation === 'drop') {
           zoneCeiling = Math.max(...highest)
           zoneFloor = Math.min(...closing)
+          zoneHeight = zoneFloor - zoneCeiling
         }
 
+        //Is the Incoming Leg valid?
+        let invalidIncomingLeg = false
+
+        //Set candlestick depending on Rally or Drop
+        if (newArray[i][5] - newArray[i][2] >= 0) {
+          incomingCandlestick = newArray[i][5] - newArray[i][2]
+        } else {
+          incomingCandlestick = newArray[i][2] - newArray[i][5]
+        }
+
+        //Is the Incoming Leg at least 50% bigger than zoneHeight and doesn't invade the Zone - Rally
+        if((newArray[1][2] > zoneCeiling)  && ((incomingCandlestick / zoneHeight) > 0.25 )) {
+          invalidIncomingLeg = true
+        } else if ((newArray[1][2] <= zoneCeiling)  &&  ( (newArray[i][5] - zoneCeiling) / zoneHeight > 0.25 )) {
+          invalidIncomingLeg = true
+        }
+
+
+        if (invalidIncomingLeg === false) {
         //Create potential Explosive Group array
         explosiveGroup =[]
         for (let z = 0; z < 4; z++) {
@@ -234,7 +246,7 @@ export const finalData = newArray.map( bar => {
             }
 
             // Check if candlestick of the Leg-Base is lower than the floor of the Potential Supply Zone
-            if(formation === 'supply' && potentialZone[index][5] < zoneFloor) {
+            if(formation === 'drop' && potentialZone[index][5] < zoneFloor) {
               zoneInvalidatedByLegBases = true
               break
             }
@@ -251,36 +263,31 @@ export const finalData = newArray.map( bar => {
         //Check to see if bar is explosive in a Rally and less than 40% inside the Zone or if the 4 bars form an explosive group
         highestPriceArray = explosiveGroup.map(bar => bar ? bar[3] : null)
         highestPriceInExplosiveGroup = Math.max(...highestPriceArray)
-        barDistanceFromDemandZone = bar[5] - zoneCeiling
+        barDistanceFromDemandZone = bar[3] - zoneCeiling
         groupDistanceFromDemandZone =  highestPriceInExplosiveGroup - zoneCeiling
         zoneHeight = zoneCeiling-zoneFloor
 
-        if (formation === 'rally' && (zoneCeiling === bar[2] || (((zoneCeiling-bar[2])/zoneHeight) <= 0.4)) && (barDistanceFromDemandZone >= zoneHeight || groupDistanceFromDemandZone >= (zoneHeight * 2))  ) {
+        if (formation === 'rally' && (zoneCeiling === bar[2] || (((zoneCeiling-bar[4])/zoneHeight) <= 0.4)) && (barDistanceFromDemandZone >= zoneHeight || groupDistanceFromDemandZone >= (zoneHeight * 2))  ) {
 
-          //Check if there are no Attractor Zones
+          //Check for Attractor Zones
             //Create Array with the ZoneCeiling of all the Previous Rally Zones
+
             let newArrayOfZones = arrayOfZones.filter(zone => zone[4]['formation'] === 'rally').map(rallyZone => rallyZone[1]['zoneCeiling'])
             //Check if the previous zoneCeilings are under the current zoneFloor and close enough to Zone
             for(let x = 0; x < newArrayOfZones.length; x++) {
               if (newArrayOfZones[x] <= zoneFloor && ( (zoneFloor - newArrayOfZones[x]) <= (zoneHeight * 2) ) ) {
                 demandAttractorZoneFound = true
                 break
+              } else {
+                demandAttractorZoneFound = false
               }
             }
 
           if (demandAttractorZoneFound === false) {
-          arrayOfZones.push([ {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': ''} ])
+          arrayOfZones.push([ {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': ''}, {'incomingLeg': i}, {'outgoingLeg': idx} ])
 
           //Set data to draw Zone in chart
           zoneData.push(potentialZone.map( bar => {return {'x': createDateTime(bar), 'high': zoneCeiling, 'low':  zoneFloor}}))
-
-          console.log('This is a Potential Demand Zone', potentialZone)
-          console.log('Incoming Leg: ', newArray[i])
-          console.log('Explosive Leg: ', bar)
-          console.log('Zone Ceiling: ', zoneCeiling)
-          console.log('Zone Floor: ', zoneFloor)
-          console.log(i, idx)
-          console.log('Formation: ', formation)
 
           zoneCeiling = undefined
           zoneFloor = undefined
@@ -290,15 +297,15 @@ export const finalData = newArray.map( bar => {
         //Check to see if bar is explosive in a Drop and less than 40% inside the Zone or if the 4 bars form an explosive group
         lowestPriceArray = explosiveGroup.map(bar => bar ? bar[4] : null)
         lowestPriceInExplosiveGroup = Math.min(...lowestPriceArray)
-        barDistanceFromSupplyZone = bar[5] - zoneFloor
-        groupDistanceFromSupplyZone =  lowestPriceInExplosiveGroup - zoneFloor
-        zoneHeight = zoneFloor-zoneCeiling
+        barDistanceFromSupplyZone = zoneFloor - bar[4]
+        groupDistanceFromSupplyZone =  zoneFloor - lowestPriceInExplosiveGroup
+        zoneHeight = zoneCeiling - zoneFloor
 
-        if (formation === 'drop' && (zoneFloor === bar[2] || (((zoneFloor-bar[2])/zoneHeight) <= 0.4)) && (barDistanceFromSupplyZone <= zoneHeight || groupDistanceFromSupplyZone <= (zoneHeight * 2)) ) {
+        if (formation === 'drop' && (zoneFloor === bar[2] || (((bar[2]-zoneFloor)/zoneHeight) <= 0.4)) && (barDistanceFromSupplyZone >= zoneHeight || groupDistanceFromSupplyZone >= (zoneHeight * 2)) ) {
 
-          //Check if there are no Attractor Zones
-            //Create Array with the zoneFloor of all the Previous Rally Zones
-            let newArrayOfSupplyZones = arrayOfZones.filter(zone => zone[4]['formation'] === 'supply').map(rallyZone => rallyZone[2]['zoneFloor'])
+          //Check for Attractor Zones
+            //Create Array with the zoneFloor of all the Previous Supply Zones
+            let newArrayOfSupplyZones = arrayOfZones.filter(zone => zone[4]['formation'] === 'drop').map(dropZone => dropZone[2]['zoneFloor'])
             //Check if the previous zoneFloors are over the current zoneCeiling and close enough to Zone
             for(let x = 0; x < newArrayOfSupplyZones.length; x++) {
               if (newArrayOfSupplyZones[x] >= zoneCeiling && ( (newArrayOfSupplyZones[x] - zoneCeiling) <= (zoneHeight * 2) ) ) {
@@ -306,36 +313,30 @@ export const finalData = newArray.map( bar => {
                 break
               }
             }
-            
+
           if (supplyAttractorZoneFound === false) {
-            arrayOfZones.push([ {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': ''} ])
+            arrayOfZones.push([ {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': ''}, {'incomingLeg': i}, {'outgoingLeg': idx} ])
 
             //Set data to draw Zone in chart
             zoneData.push(potentialZone.map( bar => {return {'x': createDateTime(bar), 'high': zoneCeiling, 'low':  zoneFloor}}))
-
-            console.log('This is a Potential Supply Zone', potentialZone)
-            console.log('Incoming Leg: ', newArray[i])
-            console.log('Explosive Leg: ', bar)
-            console.log('Zone Ceiling: ', zoneCeiling)
-            console.log('Zone Floor: ', zoneFloor)
-            console.log(i, idx)
 
             zoneCeiling = undefined
             zoneFloor = undefined
           }
         }
-        //Finished setting Potential Zone, leave loop to return data for chart below
-        break
-        }
-        }  else if (potentialZone.length > 5) {
-          potentialZone = []
-          console.log('More than 5 bars after leg without an explosive leg. Start looking for a new Zone!')
-          break
-        }
-      } else {
-        zoneInvalidatedByLegBases = false
-        i = i - 1
       }
+      //Finished setting Potential Zone, leave loop to return data for chart below
+      break
+      }
+    }  else if (potentialZone.length > 6) {
+        potentialZone = []
+        console.log('More than 6 bars after leg without an explosive leg. Start looking for a new Zone!')
+        break
+      }
+    } else {
+      zoneInvalidatedByLegBases = false
+      i = i - 1
+    }
   }
 }
 }
@@ -419,6 +420,7 @@ export const options = {
       ],
       yAxis: {
           min: 2595,
+          tickInterval: 10,
           title: {
               text: 'Price'
           },
@@ -437,7 +439,6 @@ export const options = {
 
       export const optionsTwo = {
             chart: {
-              height: '100%',
               zoomType: 'xy',
 
               xAxis: {
@@ -496,41 +497,13 @@ export const options = {
           color: 'orange',
           opacity: 0.3,
           zIndex: -1,
-          data: [{
-            x: 1546405200000,
-            low: 2461.5,
-            high: 2496.5,
-          },
-          {
-            x: 1546408800000,
-            low: 2461.5,
-            high: 2496.5,
-          },
-          {
-            x: 1546412400000,
-            low: 2461.5,
-            high: 2496.5,
-          },
-          {
-            x: 1546416000000,
-            low: 2461.5,
-            high: 2496.5,
-          },
-          {
-            x: 1546419600000,
-            low: 2461.5,
-            high: 2496.5,
-          },
-          {
-            x: 1546423200000,
-            low: 2461.5,
-            high: 2496.5,
-          }],
+          data: zoneData.flat(),
           pointRange: 3600000
         }
             ],
             yAxis: {
-                min: 2445,
+                min: 2595,
+                tickInterval: 10,
                 title: {
                     text: 'Price'
                 },
