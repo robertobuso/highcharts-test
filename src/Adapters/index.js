@@ -45,6 +45,8 @@ let groupDistanceFromDemandZone
 let demandAttractorZoneFound = false
 let supplyAttractorZoneFound = false
 let incomingCandlestick
+let incomingFormation
+let invalidIncomingLeg = false
 
 //Set initial ceiling and floor based on direction of first bar
   if (newArray[0][5] - newArray[0][2] >= 0) {
@@ -150,7 +152,7 @@ export const finalData = newArray.map( bar => {
     let zoneInvalidatedByLegBases = false
 
     //Is there an Incoming Leg?
-    if (idx > 6) {firstPotentialLeg = idx - 6} else {firstPotentialLeg = 0}
+    if (idx > 7) {firstPotentialLeg = idx - 7} else {firstPotentialLeg = 0}
 
     while ( i >= firstPotentialLeg) {
       if (isItALeg(newArray[i])) {
@@ -169,7 +171,7 @@ export const finalData = newArray.map( bar => {
         potentialZone.push(newArray[z])
       }
 
-      //Check to see if there are more than 5 bars in a row after Initial Leg
+      //Check to see if there are more than 6 bars in a row after Initial Leg
       if (potentialZone.length <= 6) {
 
         let highest = potentialZone.map( bar => bar[3])
@@ -194,22 +196,28 @@ export const finalData = newArray.map( bar => {
         }
 
         //Is the Incoming Leg valid?
-        let invalidIncomingLeg = false
-
         //Set candlestick depending on Rally or Drop
         if (newArray[i][5] - newArray[i][2] >= 0) {
           incomingCandlestick = newArray[i][5] - newArray[i][2]
+          incomingFormation = 'rally'
         } else {
           incomingCandlestick = newArray[i][2] - newArray[i][5]
+          incomingFormation = 'drop'
         }
 
-        //Is the Incoming Leg at least 50% bigger than zoneHeight and doesn't invade the Zone - Rally
-        if((newArray[1][2] > zoneCeiling)  && ((incomingCandlestick / zoneHeight) > 0.25 )) {
+        //Is the Incoming Leg at least 25% bigger than zoneHeight and doesn't invade the Zone - Rally
+        if (incomingFormation === 'rally' && (newArray[i][2] > zoneCeiling) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
           invalidIncomingLeg = true
-        } else if ((newArray[1][2] <= zoneCeiling)  &&  ( (newArray[i][5] - zoneCeiling) / zoneHeight > 0.25 )) {
+        } else if (incomingFormation === 'rally' && ((newArray[i][2] < zoneCeiling && newArray[i][2] > zoneFloor) || (newArray[i][5] > zoneFloor && newArray[i][5] < zoneCeiling))  &&  ( (newArray[i][5] - zoneCeiling) / zoneHeight < 0.25 )) {
           invalidIncomingLeg = true
         }
 
+        //Is the Incoming Leg at least 25% bigger than zoneHeight and doesn't invade the Zone - Drop
+        if (incomingFormation === 'drop' && (newArray[i][5] > zoneCeiling) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
+          invalidIncomingLeg = true
+        } else if (incomingFormation === 'drop' && ((newArray[i][5] < zoneCeiling && newArray[i][5] > zoneFloor) || (newArray[i][2] < zoneFloor && newArray[i][2] > zoneCeiling))  &&  ( (newArray[i][5] - zoneCeiling) / zoneHeight < 0.25 )) {
+          invalidIncomingLeg = true
+        }
 
         if (invalidIncomingLeg === false) {
         //Create potential Explosive Group array
@@ -228,25 +236,25 @@ export const finalData = newArray.map( bar => {
             numberOfLegs = numberOfLegs + 1
 
             // Check if candlestick of the Leg-Base is higher than the ceiling of the Potential Demand Zone
-            if(formation === 'rally' && potentialZone[index][5] > zoneCeiling) {
+            if (formation === 'rally' && potentialZone[index][5] > zoneCeiling) {
               zoneInvalidatedByLegBases = true
               break
             }
 
             // Check if candlestick of the Leg-Base is higher than the ceiling of the Potential Supply Zone
-            if(formation === 'drop' && potentialZone[index][2] > zoneCeiling) {
+            if (formation === 'drop' && potentialZone[index][2] > zoneCeiling) {
               zoneInvalidatedByLegBases = true
               break
             }
 
             // Check if candlestick of the Leg-Base is lower than the floor of the Potential Demand Zone
-            if(formation === 'rally' && potentialZone[index][2] < zoneFloor) {
+            if (formation === 'rally' && potentialZone[index][2] < zoneFloor) {
               zoneInvalidatedByLegBases = true
               break
             }
 
             // Check if candlestick of the Leg-Base is lower than the floor of the Potential Supply Zone
-            if(formation === 'drop' && potentialZone[index][5] < zoneFloor) {
+            if (formation === 'drop' && potentialZone[index][5] < zoneFloor) {
               zoneInvalidatedByLegBases = true
               break
             }
@@ -291,6 +299,7 @@ export const finalData = newArray.map( bar => {
 
           zoneCeiling = undefined
           zoneFloor = undefined
+          break
           }
         }
 
@@ -310,7 +319,6 @@ export const finalData = newArray.map( bar => {
             for(let x = 0; x < newArrayOfSupplyZones.length; x++) {
               if (newArrayOfSupplyZones[x] >= zoneCeiling && ( (newArrayOfSupplyZones[x] - zoneCeiling) <= (zoneHeight * 2) ) ) {
                 supplyAttractorZoneFound = true
-                break
               }
             }
 
@@ -328,12 +336,18 @@ export const finalData = newArray.map( bar => {
       //Finished setting Potential Zone, leave loop to return data for chart below
       break
       }
+      //This is when invalidIncomingLeg === true
+
     }  else if (potentialZone.length > 6) {
         potentialZone = []
+        invalidIncomingLeg = false
+        zoneInvalidatedByLegBases = false
         console.log('More than 6 bars after leg without an explosive leg. Start looking for a new Zone!')
         break
       }
     } else {
+      potentialZone = []
+      invalidIncomingLeg = false
       zoneInvalidatedByLegBases = false
       i = i - 1
     }
