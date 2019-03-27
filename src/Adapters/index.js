@@ -47,6 +47,7 @@ let supplyAttractorZoneFound = false
 let incomingCandlestick
 let incomingFormation
 let invalidIncomingLeg = false
+let percentageInsideZone
 
 //Set initial ceiling and floor based on direction of first bar
   if (newArray[0][5] - newArray[0][2] >= 0) {
@@ -155,8 +156,8 @@ export const finalData = newArray.map( bar => {
     if (idx > 7) {firstPotentialLeg = idx - 7} else {firstPotentialLeg = 0}
 
     while ( i >= firstPotentialLeg) {
-      if (isItALeg(newArray[i])) {
 
+      if (isItALeg(newArray[i])) {
         //Is it a rally or a drop?
         if (newArray[idx][5] - newArray[idx][2] >= 0) {
           candlestick = newArray[idx][5] - newArray[idx][2]
@@ -206,14 +207,14 @@ export const finalData = newArray.map( bar => {
         }
 
         //Is the Incoming Leg at least 25% bigger than zoneHeight and doesn't invade the Zone - Rally
-        if (incomingFormation === 'rally' && (newArray[i][2] > zoneCeiling) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
+        if (incomingFormation === 'rally' && ((newArray[i][4] >= zoneCeiling || newArray[i][3] <= zoneFloor)) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
           invalidIncomingLeg = true
-        } else if (incomingFormation === 'rally' && ((newArray[i][2] < zoneCeiling && newArray[i][2] > zoneFloor) || (newArray[i][5] > zoneFloor && newArray[i][5] < zoneCeiling))  &&  ( (newArray[i][5] - zoneCeiling) / zoneHeight < 0.25 )) {
+        } else if (incomingFormation === 'rally' && ((newArray[i][4] < zoneCeiling && newArray[i][3] > zoneFloor))  &&  ( (newArray[i][5] - zoneCeiling) / zoneHeight < 0.25 )) {
           invalidIncomingLeg = true
         }
 
         //Is the Incoming Leg at least 25% bigger than zoneHeight and doesn't invade the Zone - Drop
-        if (incomingFormation === 'drop' && (newArray[i][5] > zoneCeiling) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
+        if (incomingFormation === 'drop' && ((newArray[i][5] >= zoneCeiling || newArray[i][2] <= zoneFloor)) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
           invalidIncomingLeg = true
         } else if (incomingFormation === 'drop' && ((newArray[i][5] < zoneCeiling && newArray[i][5] > zoneFloor) || (newArray[i][2] < zoneFloor && newArray[i][2] > zoneCeiling))  &&  ( (newArray[i][5] - zoneCeiling) / zoneHeight < 0.25 )) {
           invalidIncomingLeg = true
@@ -268,15 +269,44 @@ export const finalData = newArray.map( bar => {
         }
 
         if (zoneInvalidatedByLegBases === false) {
-        //Check to see if bar is explosive in a Rally and less than 40% inside the Zone or if the 4 bars form an explosive group
+
+        //Check if bar is explosive in a Rally and less than 40% inside the Zone or if the 4 bars form an explosive group
         highestPriceArray = explosiveGroup.map(bar => bar ? bar[3] : null)
         highestPriceInExplosiveGroup = Math.max(...highestPriceArray)
         barDistanceFromDemandZone = bar[3] - zoneCeiling
         groupDistanceFromDemandZone =  highestPriceInExplosiveGroup - zoneCeiling
-        zoneHeight = zoneCeiling-zoneFloor
+        zoneHeight = zoneCeiling - zoneFloor
 
-        if (formation === 'rally' && (zoneCeiling === bar[2] || (((zoneCeiling-bar[4])/zoneHeight) <= 0.4)) && (barDistanceFromDemandZone >= zoneHeight || groupDistanceFromDemandZone >= (zoneHeight * 2))  ) {
+        if (formation === 'rally' && bar[4] < zoneCeiling && bar[3] > zoneFloor) {
+        	if (bar[4] < zoneCeiling) {
+        		percentageInsideZone = (zoneCeiling - bar[4]) / zoneHeight
+        	} else {
+        		percentageInsideZone = (bar[3] - zoneFloor) /zoneHeight
+        	}
+        }
 
+        if (formation === 'rally' && (
+        //Outgoing Leg is Outside Zone
+        ( (bar[4] >= zoneCeiling || bar[3] <= zoneFloor) &&
+        //Distance between Highest Price of the Explosive Bar or Group is equal to or more than 1X or 2X the zoneHeight
+        (
+          barDistanceFromDemandZone >= zoneHeight || groupDistanceFromDemandZone >= (zoneHeight * 2)
+        )
+        )
+       ||
+        //Outgoing Leg is Inside Zone
+        (
+        (bar[4] < zoneCeiling && bar[3] > zoneFloor) &&
+
+        //The part of the Outgoing Leg Inside Zone is equal to or less than 40% of the zoneHeight
+        (percentageInsideZone <= 0.4 &&
+
+        //The distance between Highest Price of the Explosive Bar or Group is equal to or more than 1X or 2X the zoneHeight
+        (barDistanceFromDemandZone >= zoneHeight || groupDistanceFromDemandZone >= (zoneHeight * 2))
+
+        ) ) ) )
+
+        {
           //Check for Attractor Zones
             //Create Array with the ZoneCeiling of all the Previous Rally Zones
 
@@ -342,9 +372,10 @@ export const finalData = newArray.map( bar => {
         potentialZone = []
         invalidIncomingLeg = false
         zoneInvalidatedByLegBases = false
-        console.log('More than 6 bars after leg without an explosive leg. Start looking for a new Zone!')
         break
       }
+      //Go back to initial i loop, checking previous bar if there is one
+      i = i - 1
     } else {
       potentialZone = []
       invalidIncomingLeg = false
