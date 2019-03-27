@@ -270,20 +270,21 @@ export const finalData = newArray.map( bar => {
 
         if (zoneInvalidatedByLegBases === false) {
 
+        //Set the percentage the leg is inside the Zone depending on where it penetrates
+        if (bar[4] < zoneCeiling && bar[3] > zoneFloor) {
+          if (bar[4] < zoneCeiling) {
+            percentageInsideZone = (zoneCeiling - bar[4]) / zoneHeight
+          } else {
+            percentageInsideZone = (bar[3] - zoneFloor) /zoneHeight
+          }
+        }
+
         //Check if bar is explosive in a Rally and less than 40% inside the Zone or if the 4 bars form an explosive group
         highestPriceArray = explosiveGroup.map(bar => bar ? bar[3] : null)
         highestPriceInExplosiveGroup = Math.max(...highestPriceArray)
         barDistanceFromDemandZone = bar[3] - zoneCeiling
         groupDistanceFromDemandZone =  highestPriceInExplosiveGroup - zoneCeiling
         zoneHeight = zoneCeiling - zoneFloor
-
-        if (formation === 'rally' && bar[4] < zoneCeiling && bar[3] > zoneFloor) {
-        	if (bar[4] < zoneCeiling) {
-        		percentageInsideZone = (zoneCeiling - bar[4]) / zoneHeight
-        	} else {
-        		percentageInsideZone = (bar[3] - zoneFloor) /zoneHeight
-        	}
-        }
 
         if (formation === 'rally' && (
         //Outgoing Leg is Outside Zone
@@ -303,9 +304,7 @@ export const finalData = newArray.map( bar => {
 
         //The distance between Highest Price of the Explosive Bar or Group is equal to or more than 1X or 2X the zoneHeight
         (barDistanceFromDemandZone >= zoneHeight || groupDistanceFromDemandZone >= (zoneHeight * 2))
-
         ) ) ) )
-
         {
           //Check for Attractor Zones
             //Create Array with the ZoneCeiling of all the Previous Rally Zones
@@ -340,8 +339,27 @@ export const finalData = newArray.map( bar => {
         groupDistanceFromSupplyZone =  zoneFloor - lowestPriceInExplosiveGroup
         zoneHeight = zoneCeiling - zoneFloor
 
-        if (formation === 'drop' && (zoneFloor === bar[2] || (((bar[2]-zoneFloor)/zoneHeight) <= 0.4)) && (barDistanceFromSupplyZone >= zoneHeight || groupDistanceFromSupplyZone >= (zoneHeight * 2)) ) {
+        if (formation === 'drop' && (
+        //Outgoing Leg is Outside Zone
+        ( (bar[4] >= zoneCeiling || bar[3] <= zoneFloor) &&
+        //Distance between Lowest Price of the Explosive Bar or Group is equal to or more than 1X or 2X the zoneHeight
+        (
+          barDistanceFromSupplyZone >= zoneHeight || groupDistanceFromSupplyZone >= (zoneHeight * 2)
+        )
+        )
+       ||
+        //Outgoing Leg is Inside Zone
+        (
+        (bar[4] < zoneCeiling && bar[3] > zoneFloor) &&
 
+        //The part of the Outgoing Leg Inside Zone is equal to or less than 40% of the zoneHeight
+        (percentageInsideZone <= 0.4 &&
+
+        //The distance between Highest Price of the Explosive Bar or Group is equal to or more than 1X or 2X the zoneHeight
+        (barDistanceFromSupplyZone >= zoneHeight || groupDistanceFromSupplyZone >= (zoneHeight * 2))
+
+        ) ) ) )
+        {
           //Check for Attractor Zones
             //Create Array with the zoneFloor of all the Previous Supply Zones
             let newArrayOfSupplyZones = arrayOfZones.filter(zone => zone[4]['formation'] === 'drop').map(dropZone => dropZone[2]['zoneFloor'])
