@@ -216,6 +216,8 @@ console.log('incomingLeg: ', i)
           incomingFormation = 'rally'
 
           //Set size outside Zone when leg is partly in Zone
+          candlestickSizeOutsideZone = 0
+
           if (newArray[i][2] < zoneFloor) {
             candlestickSizeOutsideZone = candlestickSizeOutsideZone + (zoneFloor-newArray[i][2])
           }
@@ -241,13 +243,13 @@ console.log('incomingLeg: ', i)
         }
 
         //Is the Incoming Leg at least 25% bigger than zoneHeight and doesn't invade the Zone - Rally
-        if (incomingFormation === 'rally' && ((newArray[i][4] >= zoneCeiling || newArray[i][3] <= zoneFloor)) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
+        if (incomingFormation === 'rally' && ((newArray[i][2] >= zoneCeiling || newArray[i][5] <= zoneFloor)) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
           invalidIncomingLeg = true
           console.log('Line 226: invalid Incoming Leg, outside Zone')
         } else if (incomingFormation === 'rally'
         &&
         //Incoming Leg is Outside Zone
-        ((newArray[i][4] < zoneCeiling && newArray[i][3] > zoneFloor))
+        ((newArray[i][2] < zoneFloor && newArray[i][5] > zoneFloor) || (newArray[i][2] < zoneCeiling && newArray[i][2] > zoneCeiling))
         &&
         //Candlestick outside zone is less than 25% of Zone
         ( (candlestickSizeOutsideZone / zoneHeight) < 0.25 )) {
@@ -259,7 +261,13 @@ console.log('incomingLeg: ', i)
         //Is the Incoming Leg at least 25% bigger than zoneHeight and doesn't invade the Zone - Drop
         if (incomingFormation === 'drop' && ((newArray[i][5] >= zoneCeiling || newArray[i][2] <= zoneFloor)) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
           invalidIncomingLeg = true
-        } else if (incomingFormation === 'drop' && ((newArray[i][5] < zoneCeiling && newArray[i][5] > zoneFloor) || (newArray[i][2] < zoneFloor && newArray[i][2] > zoneCeiling))  &&  ( (candlestickSizeOutsideZone / zoneHeight) < 0.25 )) {
+        } else if (incomingFormation === 'drop'
+        &&
+        //Incoming Leg is Outside Zone
+        ((newArray[i][5] < zoneCeiling && newArray[i][5] > zoneFloor) || (newArray[i][2] < zoneFloor && newArray[i][2] > zoneCeiling))
+        &&
+        //Candlestick outside zone is less than 25% of Zone
+        ( (candlestickSizeOutsideZone / zoneHeight) < 0.25 )) {
           invalidIncomingLeg = true
         }
 
