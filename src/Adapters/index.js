@@ -193,6 +193,7 @@ export const finalData = newArray.map( bar => {
           zoneCeiling = Math.max(...highest)
           zoneFloor = Math.min(...lowest)
           zoneHeight = zoneCeiling - zoneFloor
+
           console.log('DOJI!!!', potentialZone.length)
           console.log('idx: ', idx)
           console.log('i: ', i)
@@ -202,13 +203,37 @@ export const finalData = newArray.map( bar => {
           zoneCeiling = Math.max(...topOfCandlestick)
           zoneFloor = Math.min(...lowest)
           zoneHeight = zoneCeiling - zoneFloor
+
+          //Check for Attractor Bars
+          if (i - 1 > 0 && newArray[i-1][4] <= zoneFloor && ( zoneFloor - newArray[i-1][4]) <= zoneHeight ) {
+            zoneFloor = newArray[i-1][4]
+            console.log('First Previous Bar is an Attractor Bar!')
+          }
+
+          if (i - 2 > 0 && newArray[i-2][4] <= zoneFloor && ( zoneFloor - newArray[i-2][4]) <= zoneHeight ) {
+            zoneFloor = newArray[i-2][4]
+            console.log('Second Previous Bar is an Attractor Bar!')
+          }
+
         }
         //Set ceiling and floor of Zone for Drop
         else if (formation === 'drop') {
           zoneCeiling = Math.max(...highest)
           zoneFloor = Math.min(...topOfCandlestick)
           zoneHeight = zoneCeiling - zoneFloor
+
+          //Check for Attractor Bars
+          if (i - 1 > 0 && newArray[i-1][3] >= zoneCeiling && ( newArray[i-1][3] - zoneCeiling ) <= zoneHeight ) {
+            zoneCeiling = newArray[i-1][3]
+            console.log('First Previous Bar is an Attractor Bar!')
+          }
+
+          if (i - 2 > 0 && newArray[i-2][3] >= zoneCeiling && ( newArray[i-2][3] - zoneCeiling ) <= zoneHeight ) {
+            zoneCeiling = newArray[i-2][3]
+            console.log('Second Previous Bar is an Attractor Bar!')
+          }
         }
+
 console.log('zoneHeight: ', zoneHeight)
 console.log('incomingLeg: ', i)
         //Is the Incoming Leg valid?
@@ -277,7 +302,7 @@ console.log('incomingLeg: ', i)
         }
 
         if (invalidIncomingLeg === false) {
-          console.log('Incoming Leg is Valid, line 275')
+          console.log('Incoming Leg is Valid, line 305')
         //Create potential Explosive Group array
         explosiveGroup =[]
         for (let z = 0; z < 4; z++) {
@@ -296,30 +321,35 @@ console.log('incomingLeg: ', i)
             // Check if candlestick of the Leg-Base is higher than the ceiling of the Potential Demand Zone
             if (formation === 'rally' && potentialZone[index][5] > zoneCeiling) {
               zoneInvalidatedByLegBases = true
+              console.log('Invalidated by Leg Bases 1')
               break
             }
 
             // Check if candlestick of the Leg-Base is higher than the ceiling of the Potential Supply Zone
             if (formation === 'drop' && potentialZone[index][2] > zoneCeiling) {
               zoneInvalidatedByLegBases = true
+              console.log('Invalidated by Leg Bases 2')
               break
             }
 
             // Check if candlestick of the Leg-Base is lower than the floor of the Potential Demand Zone
             if (formation === 'rally' && potentialZone[index][2] < zoneFloor) {
               zoneInvalidatedByLegBases = true
+              console.log('Invalidated by Leg Bases 3')
               break
             }
 
             // Check if candlestick of the Leg-Base is lower than the floor of the Potential Supply Zone
             if (formation === 'drop' && potentialZone[index][5] < zoneFloor) {
               zoneInvalidatedByLegBases = true
+              console.log('Invalidated by Leg Bases 4')
               break
             }
 
             // Are there are more Leg-Bases than Bases?
             if( (numberOfLegs/potentialZone.length) > 0.5) {
               zoneInvalidatedByLegBases = true
+              console.log('Invalidated by Leg Bases 5')
               break
             }
           }
