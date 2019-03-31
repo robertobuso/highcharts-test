@@ -187,6 +187,9 @@ export const finalData = newArray.map( bar => {
         let topOfCandlestick = potentialZone.map( bar => {
                         return bar[5] > bar[2] ?  bar[5] : bar[2]
           })
+        let bottomOfCandlestick = potentialZone.map( bar => {
+                        return bar[5] > bar[2] ?  bar[2] : bar[5]
+          })
 
         //Set ceiling and floor of Zone based for Rally
         if (potentialZone.length === 1) {
@@ -219,7 +222,7 @@ export const finalData = newArray.map( bar => {
         //Set ceiling and floor of Zone for Drop
         else if (formation === 'drop') {
           zoneCeiling = Math.max(...highest)
-          zoneFloor = Math.min(...topOfCandlestick)
+          zoneFloor = Math.min(...bottomOfCandlestick)
           zoneHeight = zoneCeiling - zoneFloor
 
           //Check for Attractor Bars
@@ -301,13 +304,37 @@ console.log('incomingLeg: ', i)
           console.log('Line 276: invalid Incoming Leg, inside Zone')
         }
 
-        if (invalidIncomingLeg === false) {
-          console.log('Incoming Leg is Valid, line 305')
         //Create potential Explosive Group array
         explosiveGroup =[]
         for (let z = 0; z < 4; z++) {
           explosiveGroup.push(newArray[idx + z])
         }
+
+        //Check for Very Explosive Group and adjust Incoming Leg Validity
+
+        //Check for a Rally
+        highestPriceArray = explosiveGroup.map(bar => bar ? bar[3] : null)
+        highestPriceInExplosiveGroup = Math.max(...highestPriceArray)
+        groupDistanceFromDemandZone =  highestPriceInExplosiveGroup - zoneCeiling
+
+         if (formation === 'rally' && groupDistanceFromDemandZone >= (zoneHeight * 4)) {
+           console.log('VERY EXPLOSIVE GROUP IN A RALLY!')
+           invalidIncomingLeg = false
+         }
+
+         //Check for a Drop
+         lowestPriceArray = explosiveGroup.map(bar => bar ? bar[4] : null)
+         lowestPriceInExplosiveGroup = Math.min(...lowestPriceArray)
+         groupDistanceFromSupplyZone =  zoneFloor - lowestPriceInExplosiveGroup
+
+         if (formation === 'drop' && groupDistanceFromSupplyZone >= (zoneHeight * 4)) {
+           console.log('VERY EXPLOSIVE GROUP IN A DROP!')
+           invalidIncomingLeg = false
+         }
+
+
+        if (invalidIncomingLeg === false) {
+          console.log('Incoming Leg is Valid, line 311')
 
         // Check Leg-Bases
         let zoneInvalidatedByLegBases = false
