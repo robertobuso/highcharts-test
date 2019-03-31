@@ -184,7 +184,9 @@ export const finalData = newArray.map( bar => {
 
         let highest = potentialZone.map( bar => bar[3])
         let lowest = potentialZone.map( bar => bar[4])
-        let closing = potentialZone.map( bar => bar[5])
+        let topOfCandlestick = potentialZone.map( bar => {
+                        return bar[5] > bar[2] ?  bar[5] : bar[2]
+          })
 
         //Set ceiling and floor of Zone based for Rally
         if (potentialZone.length === 1) {
@@ -197,14 +199,14 @@ export const finalData = newArray.map( bar => {
           console.log('Potential Zone inside Doji: ', potentialZone)
         }
         else if (formation === 'rally') {
-          zoneCeiling = Math.max(...closing)
+          zoneCeiling = Math.max(...topOfCandlestick)
           zoneFloor = Math.min(...lowest)
           zoneHeight = zoneCeiling - zoneFloor
         }
         //Set ceiling and floor of Zone for Drop
         else if (formation === 'drop') {
           zoneCeiling = Math.max(...highest)
-          zoneFloor = Math.min(...closing)
+          zoneFloor = Math.min(...topOfCandlestick)
           zoneHeight = zoneCeiling - zoneFloor
         }
 console.log('zoneHeight: ', zoneHeight)
@@ -226,8 +228,8 @@ console.log('incomingLeg: ', i)
             candlestickSizeOutsideZone = candlestickSizeOutsideZone + (newArray[i][5] - zoneCeiling)
           }
 
-          console.log('Line 216, incomingLeg is a Rally')
-          console.log('Line 216, before checking this is invalidIncomingLeg: ', invalidIncomingLeg)
+          console.log('Line 229, incomingLeg is a Rally')
+          console.log('Line 230, before checking this is invalidIncomingLeg: ', invalidIncomingLeg)
         } else {
           incomingCandlestick = newArray[i][2] - newArray[i][5]
           incomingFormation = 'drop'
@@ -240,12 +242,15 @@ console.log('incomingLeg: ', i)
           if (newArray[i][5] < zoneFloor) {
             candlestickSizeOutsideZone = candlestickSizeOutsideZone + (zoneFloor - newArray[i][5])
           }
+
+          console.log('Line 244, incomingLeg is a Drop')
+          console.log('Line 245, before checking this is invalidIncomingLeg: ', invalidIncomingLeg)
         }
 
         //Is the Incoming Leg at least 25% bigger than zoneHeight and doesn't invade the Zone - Rally
         if (incomingFormation === 'rally' && ((newArray[i][2] >= zoneCeiling || newArray[i][5] <= zoneFloor)) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
           invalidIncomingLeg = true
-          console.log('Line 226: invalid Incoming Leg, outside Zone')
+          console.log('Line 248: invalid Incoming Leg, outside Zone')
         } else if (incomingFormation === 'rally'
         &&
         //Incoming Leg is Outside Zone
@@ -254,8 +259,7 @@ console.log('incomingLeg: ', i)
         //Candlestick outside zone is less than 25% of Zone
         ( (candlestickSizeOutsideZone / zoneHeight) < 0.25 )) {
           invalidIncomingLeg = true
-          console.log('Line 229: invalid Incoming Leg, inside Zone')
-          console.log('Low: ', )
+          console.log('Line 257: invalid Incoming Leg, inside Zone')
         }
 
         //Is the Incoming Leg at least 25% bigger than zoneHeight and doesn't invade the Zone - Drop
@@ -263,16 +267,17 @@ console.log('incomingLeg: ', i)
           invalidIncomingLeg = true
         } else if (incomingFormation === 'drop'
         &&
-        //Incoming Leg is Outside Zone
+        //Incoming Leg is Inside Zone
         ((newArray[i][5] < zoneCeiling && newArray[i][5] > zoneFloor) || (newArray[i][2] < zoneFloor && newArray[i][2] > zoneCeiling))
         &&
         //Candlestick outside zone is less than 25% of Zone
         ( (candlestickSizeOutsideZone / zoneHeight) < 0.25 )) {
           invalidIncomingLeg = true
+          console.log('Line 276: invalid Incoming Leg, inside Zone')
         }
 
         if (invalidIncomingLeg === false) {
-          console.log('Incoming Leg is Valid, line 237')
+          console.log('Incoming Leg is Valid, line 275')
         //Create potential Explosive Group array
         explosiveGroup =[]
         for (let z = 0; z < 4; z++) {
@@ -370,6 +375,7 @@ console.log('incomingLeg: ', i)
             for(let x = 0; x < newArrayOfZones.length; x++) {
               if (newArrayOfZones[x] <= zoneFloor && ( (zoneFloor - newArrayOfZones[x]) <= (zoneHeight * 2) ) ) {
                 demandAttractorZoneFound = true
+                console.log('Attractor Zone! Line 373')
                 break
               } else {
                 demandAttractorZoneFound = false
@@ -384,7 +390,6 @@ console.log('incomingLeg: ', i)
 
           zoneCeiling = undefined
           zoneFloor = undefined
-          break
           }
         }
 
@@ -423,6 +428,7 @@ console.log('incomingLeg: ', i)
             for(let x = 0; x < newArrayOfSupplyZones.length; x++) {
               if (newArrayOfSupplyZones[x] >= zoneCeiling && ( (newArrayOfSupplyZones[x] - zoneCeiling) <= (zoneHeight * 2) ) ) {
                 supplyAttractorZoneFound = true
+                console.log('Attractor Zone! Line 426')
               }
             }
 
@@ -438,7 +444,7 @@ console.log('incomingLeg: ', i)
         }
       }
       //Finished setting Potential Zone, leave loop to return data for chart below
-      break
+      i = i - 1
       }
       //This is when invalidIncomingLeg === true
 
@@ -450,11 +456,16 @@ console.log('incomingLeg: ', i)
         break
       }
       //Go back to initial i loop, checking previous bar if there is one
+      potentialZone = []
+      invalidIncomingLeg = false
+      zoneInvalidatedByLegBases = false
+      candlestickSizeOutsideZone = 0
       i = i - 1
     } else {
       potentialZone = []
       invalidIncomingLeg = false
       zoneInvalidatedByLegBases = false
+      candlestickSizeOutsideZone = 0
       i = i - 1
     }
   }
