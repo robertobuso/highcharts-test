@@ -49,6 +49,7 @@ let incomingFormation
 let invalidIncomingLeg = false
 let percentageInsideZone
 let candlestickSizeOutsideZone = 0
+let isZoneFresh = true
 
 //Set initial ceiling and floor based on direction of first bar
   if (newArray[0][5] - newArray[0][2] >= 0) {
@@ -440,13 +441,31 @@ console.log('incomingLeg: ', i)
             }
 
           if (demandAttractorZoneFound === false) {
-          arrayOfZones.push([ {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': ''}, {'incomingLeg': i}, {'outgoingLeg': idx} ])
 
-          //Set data to draw Zone in chart
-          zoneData.push(potentialZone.map( bar => {return {'x': createDateTime(bar), 'high': zoneCeiling, 'low':  zoneFloor}}))
+          //Check if Zone is FRESH - Rally
+          isZoneFresh = true
+          for (let freshIdx = 0; freshIdx < 5; freshIdx++) {
+            if (newArray[idx + freshIdx][3] >= zoneFloor &&  newArray[idx + freshIdx][4] <= zoneCeiling) {
+              console.log('The Price Returned on bar number: ', freshIdx + 1)
+              if(newArray[idx + freshIdx][3] >= zoneFloor && newArray[idx + freshIdx][3] <= zoneCeiling && ((newArray[idx + freshIdx][3] - zoneFloor)/zoneHeight >= 0.25)) {
+                isZoneFresh = false
+                console.log('ZONE IS NOT FRESH. The Price Went in More than 25% -- Highest Price Above Zone Floor')
+              } else if (newArray[idx + freshIdx][4] <= zoneCeiling && newArray[idx + freshIdx][4] >= zoneFloor && ((zoneFloor - newArray[idx + freshIdx][4])/zoneHeight >= 0.25)) {
+                isZoneFresh = false
+                console.log('ZONE IS NOT FRESH. The Price Went in More than 25% -- Lowest Price Above Zone Floor')
+              }
+            }
+          }
 
-          zoneCeiling = undefined
-          zoneFloor = undefined
+          if(isZoneFresh === true) {
+            arrayOfZones.push([ {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'fresh'}, {'incomingLeg': i}, {'outgoingLeg': idx} ])
+
+            //Set data to draw Zone in chart
+            zoneData.push(potentialZone.map( bar => {return {'x': createDateTime(bar), 'high': zoneCeiling, 'low':  zoneFloor}}))
+
+            zoneCeiling = undefined
+            zoneFloor = undefined
+          }
           }
         }
 
@@ -490,13 +509,32 @@ console.log('incomingLeg: ', i)
             }
 
           if (supplyAttractorZoneFound === false) {
-            arrayOfZones.push([ {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': ''}, {'incomingLeg': i}, {'outgoingLeg': idx} ])
+
+            //Check if Zone is FRESH - Drop
+            isZoneFresh = true
+            for (let freshIdx = 0; freshIdx < 5; freshIdx++) {
+              if (newArray[idx + freshIdx][3] >= zoneFloor &&  newArray[idx + freshIdx][4] <= zoneCeiling) {
+                console.log('The Price Returned on bar number: ', freshIdx + 1)
+                if(newArray[idx + freshIdx][3] >= zoneFloor && newArray[idx + freshIdx][3] <= zoneCeiling && ((newArray[idx + freshIdx][3] - zoneFloor)/zoneHeight >= 0.25)) {
+                  isZoneFresh = false
+                  console.log('ZONE IS NOT FRESH. The Price Went in More than 25% -- Highest Price Above Zone Floor')
+                } else if (newArray[idx + freshIdx][4] <= zoneCeiling && newArray[idx + freshIdx][4] >= zoneFloor && ((zoneFloor - newArray[idx + freshIdx][4])/zoneHeight >= 0.25)) {
+                  isZoneFresh = false
+                  console.log('ZONE IS NOT FRESH. The Price Went in More than 25% -- Lowest Price Above Zone Floor')
+                }
+              }
+            }
+
+            if(isZoneFresh === true) {
+
+            arrayOfZones.push([ {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'fresh'}, {'incomingLeg': i}, {'outgoingLeg': idx} ])
 
             //Set data to draw Zone in chart
             zoneData.push(potentialZone.map( bar => {return {'x': createDateTime(bar), 'high': zoneCeiling, 'low':  zoneFloor}}))
 
             zoneCeiling = undefined
             zoneFloor = undefined
+          }
           }
         }
       }
