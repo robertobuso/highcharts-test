@@ -25,7 +25,8 @@ export const actualBases = []
 
 let potentialZone = []
 let distinctPotentialZone = []
-let arrayOfZones =[]
+let freshZones = []
+let invalidZones = []
 let candlestick = 0
 let formation = ''
 let zoneCeiling
@@ -33,7 +34,6 @@ let zoneFloor
 let zoneHeight
 let barDistanceFromDemandZone
 let barDistanceFromSupplyZone
-let firstBarIsLeg = false
 let zoneData = []
 let explosiveGroup = []
 let groupDistanceFromSupplyZone
@@ -128,7 +128,7 @@ export const finalData = newArray.map( bar => {
     potentialZone.push(newArray[1])
     distinctPotentialZone = [...new Set(potentialZone)]
 
-    arrayOfZones.push([ {'bases': distinctPotentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': ''}, {'incomingLeg': 0}, {'outgoingLeg': 3} ])
+    freshZones.push([ {'bases': distinctPotentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'fresh'}, {'incomingLeg': 0}, {'outgoingLeg': 3} ])
 
     potentialZone = []
   }
@@ -138,7 +138,7 @@ export const finalData = newArray.map( bar => {
   if (formation === 'drop' && barDistanceFromSupplyZone >= zoneCeiling-zoneFloor) {
     potentialZone.push(newArray[1])
 
-    arrayOfZones.push([ {'bases': distinctPotentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': ''}, {'incomingLeg': 0}, {'outgoingLeg': 3} ])
+    freshZones.push([ {'bases': distinctPotentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'fresh'}, {'incomingLeg': 0}, {'outgoingLeg': 3} ])
 
     potentialZone = []
   }
@@ -147,7 +147,7 @@ export const finalData = newArray.map( bar => {
 
   //After the third Bar, start looking back in time
 
-//Is it a leg?
+  //Is it a leg?
   if (idx >= 3 && isItALeg(bar)) {
     potentialZone = []
     let firstPotentialLeg
@@ -209,16 +209,13 @@ export const finalData = newArray.map( bar => {
           zoneHeight = zoneCeiling - zoneFloor
 
           //Check for Attractor Bars
-          if (i - 1 > 0 && newArray[i-1][4] <= zoneFloor && ( zoneFloor - newArray[i-1][4]) <= zoneHeight ) {
-            zoneFloor = newArray[i-1][4]
-            console.log('First Previous Bar is an Attractor Bar!')
-          }
-
           if (i - 2 > 0 && newArray[i-2][4] <= zoneFloor && ( zoneFloor - newArray[i-2][4]) <= zoneHeight ) {
             zoneFloor = newArray[i-2][4]
             console.log('Second Previous Bar is an Attractor Bar!')
+          } else if (i - 1 > 0 && newArray[i-1][4] <= zoneFloor && ( zoneFloor - newArray[i-1][4]) <= zoneHeight ) {
+            zoneFloor = newArray[i-1][4]
+            console.log('First Previous Bar is an Attractor Bar!')
           }
-
         }
         //Set ceiling and floor of Zone for Drop
         else if (formation === 'drop') {
@@ -227,19 +224,15 @@ export const finalData = newArray.map( bar => {
           zoneHeight = zoneCeiling - zoneFloor
 
           //Check for Attractor Bars
-          if (i - 1 > 0 && newArray[i-1][3] >= zoneCeiling && ( newArray[i-1][3] - zoneCeiling ) <= zoneHeight ) {
-            zoneCeiling = newArray[i-1][3]
-            console.log('First Previous Bar is an Attractor Bar!')
-          }
-
           if (i - 2 > 0 && newArray[i-2][3] >= zoneCeiling && ( newArray[i-2][3] - zoneCeiling ) <= zoneHeight ) {
             zoneCeiling = newArray[i-2][3]
             console.log('Second Previous Bar is an Attractor Bar!')
+          } else if (i - 1 > 0 && newArray[i-1][3] >= zoneCeiling && ( newArray[i-1][3] - zoneCeiling ) <= zoneHeight ) {
+            zoneCeiling = newArray[i-1][3]
+            console.log('First Previous Bar is an Attractor Bar!')
           }
         }
 
-console.log('zoneHeight: ', zoneHeight)
-console.log('incomingLeg: ', i)
         //Is the Incoming Leg valid?
         //Set candlestick depending on Rally or Drop
         if (newArray[i][5] - newArray[i][2] >= 0) {
@@ -256,9 +249,6 @@ console.log('incomingLeg: ', i)
           if (newArray[i][5] > zoneCeiling) {
             candlestickSizeOutsideZone = candlestickSizeOutsideZone + (newArray[i][5] - zoneCeiling)
           }
-
-          console.log('Line 229, incomingLeg is a Rally')
-          console.log('Line 230, before checking this is invalidIncomingLeg: ', invalidIncomingLeg)
         } else {
           incomingCandlestick = newArray[i][2] - newArray[i][5]
           incomingFormation = 'drop'
@@ -271,14 +261,14 @@ console.log('incomingLeg: ', i)
           if (newArray[i][5] < zoneFloor) {
             candlestickSizeOutsideZone = candlestickSizeOutsideZone + (zoneFloor - newArray[i][5])
           }
-
-          console.log('Line 244, incomingLeg is a Drop')
-          console.log('Line 245, before checking this is invalidIncomingLeg: ', invalidIncomingLeg)
         }
 
         //Is the Incoming Leg at least 25% bigger than zoneHeight and doesn't invade the Zone - Rally
         if (incomingFormation === 'rally' && ((newArray[i][2] >= zoneCeiling || newArray[i][5] <= zoneFloor)) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
           invalidIncomingLeg = true
+
+            invalidZones.push([ {'incomingLeg': newArray[i]}, {'outgoingLeg': newArray[idx]}, {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'Invalid Because of Incoming Leg is Less than 25% of Potential Zone (Outside Zone)'} ])
+
           console.log('Line 248: invalid Incoming Leg, outside Zone')
         } else if (incomingFormation === 'rally'
         &&
@@ -288,12 +278,18 @@ console.log('incomingLeg: ', i)
         //Candlestick outside zone is less than 25% of Zone
         ( (candlestickSizeOutsideZone / zoneHeight) < 0.25 )) {
           invalidIncomingLeg = true
+
+          invalidZones.push([ {'incomingLeg': newArray[i]}, {'outgoingLeg': newArray[idx]}, {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'Invalid Because of Incoming Leg is Less than 25% of Potential Zone (Inside Zone)'} ])
+
           console.log('Line 257: invalid Incoming Leg, inside Zone')
         }
 
         //Is the Incoming Leg at least 25% bigger than zoneHeight and doesn't invade the Zone - Drop
         if (incomingFormation === 'drop' && ((newArray[i][5] >= zoneCeiling || newArray[i][2] <= zoneFloor)) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
           invalidIncomingLeg = true
+
+          invalidZones.push([ {'incomingLeg': newArray[i]}, {'outgoingLeg': newArray[idx]}, {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'Invalid Because of Incoming Leg is Less than 25% of Potential Zone (Outside Zone)'} ])
+
         } else if (incomingFormation === 'drop'
         &&
         //Incoming Leg is Inside Zone
@@ -302,6 +298,9 @@ console.log('incomingLeg: ', i)
         //Candlestick outside zone is less than 25% of Zone
         ( (candlestickSizeOutsideZone / zoneHeight) < 0.25 )) {
           invalidIncomingLeg = true
+
+          invalidZones.push([ {'incomingLeg': newArray[i]}, {'outgoingLeg': newArray[idx]}, {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'Invalid Because of Incoming Leg is Less than 25% of Potential Zone (Outside Zone)'} ])
+
           console.log('Line 276: invalid Incoming Leg, inside Zone')
         }
 
@@ -349,6 +348,9 @@ console.log('incomingLeg: ', i)
             // Check if candlestick of the Leg-Base is higher than the ceiling of the Potential Demand Zone
             if (formation === 'rally' && potentialZone[index][5] > zoneCeiling) {
               zoneInvalidatedByLegBases = true
+
+              invalidZones.push([ {'incomingLeg': newArray[i]}, {'outgoingLeg': newArray[idx]}, {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'Invalid Because Leg-Base Candlestick Outside Zone Ceiling - Demand'} ])
+
               console.log('Invalidated by Leg Bases 1')
               break
             }
@@ -356,6 +358,9 @@ console.log('incomingLeg: ', i)
             // Check if candlestick of the Leg-Base is higher than the ceiling of the Potential Supply Zone
             if (formation === 'drop' && potentialZone[index][2] > zoneCeiling) {
               zoneInvalidatedByLegBases = true
+
+            invalidZones.push([ {'incomingLeg': newArray[i]}, {'outgoingLeg': newArray[idx]}, {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'Invalid Because Leg-Base Candlestick Outside Zone Ceiling - Supply'} ])
+
               console.log('Invalidated by Leg Bases 2')
               break
             }
@@ -363,6 +368,9 @@ console.log('incomingLeg: ', i)
             // Check if candlestick of the Leg-Base is lower than the floor of the Potential Demand Zone
             if (formation === 'rally' && potentialZone[index][2] < zoneFloor) {
               zoneInvalidatedByLegBases = true
+
+              invalidZones.push([ {'incomingLeg': newArray[i]}, {'outgoingLeg': newArray[idx]}, {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'Invalid Because Leg-Base Candlestick Outside Zone Floor - Demand'} ])
+
               console.log('Invalidated by Leg Bases 3')
               break
             }
@@ -370,6 +378,9 @@ console.log('incomingLeg: ', i)
             // Check if candlestick of the Leg-Base is lower than the floor of the Potential Supply Zone
             if (formation === 'drop' && potentialZone[index][5] < zoneFloor) {
               zoneInvalidatedByLegBases = true
+
+              invalidZones.push([ {'incomingLeg': newArray[i]}, {'outgoingLeg': newArray[idx]}, {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'Invalid Because Leg-Base Candlestick Outside Zone Floor - Supply'} ])
+
               console.log('Invalidated by Leg Bases 4')
               break
             }
@@ -377,6 +388,9 @@ console.log('incomingLeg: ', i)
             // Are there are more Leg-Bases than Bases?
             if( (numberOfLegs/potentialZone.length) > 0.5) {
               zoneInvalidatedByLegBases = true
+
+              invalidZones.push([ {'incomingLeg': newArray[i]}, {'outgoingLeg': newArray[idx]}, {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'Invalid Because There are More Leg-Bases than Bases'} ])
+
               console.log('Invalidated by Leg Bases 5')
               break
             }
@@ -428,11 +442,14 @@ console.log('incomingLeg: ', i)
           //Check for Attractor Zones
             //Create Array with the ZoneCeiling of all the Previous Rally Zones
 
-            let newArrayOfZones = arrayOfZones.filter(zone => zone[4]['formation'] === 'rally').map(rallyZone => rallyZone[1]['zoneCeiling'])
+            let newArrayOfZones = freshZones.filter(zone => zone[4]['formation'] === 'rally').map(rallyZone => rallyZone[1]['zoneCeiling'])
             //Check if the previous zoneCeilings are under the current zoneFloor and close enough to Zone
             for(let x = 0; x < newArrayOfZones.length; x++) {
               if (newArrayOfZones[x] <= zoneFloor && ( (zoneFloor - newArrayOfZones[x]) <= (zoneHeight * 2) ) ) {
                 demandAttractorZoneFound = true
+
+                invalidZones.push([ {'incomingLeg': newArray[i]}, {'outgoingLeg': newArray[idx]}, {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'Invalid - Attractor Zone Found - Demand'} ])
+
                 console.log('Attractor Zone! Line 373')
                 break
               } else {
@@ -449,16 +466,22 @@ console.log('incomingLeg: ', i)
               console.log('The Price Returned on bar number: ', freshIdx + 1)
               if(newArray[idx + freshIdx][3] >= zoneFloor && newArray[idx + freshIdx][3] <= zoneCeiling && ((newArray[idx + freshIdx][3] - zoneFloor)/zoneHeight >= 0.25)) {
                 isZoneFresh = false
+
+                invalidZones.push([ {'incomingLeg': newArray[i]}, {'outgoingLeg': newArray[idx]}, {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'Not Fresh - Price Went in More than 25% -- Highest Price Above Zone Floor'} ])
+
                 console.log('ZONE IS NOT FRESH. The Price Went in More than 25% -- Highest Price Above Zone Floor')
               } else if (newArray[idx + freshIdx][4] <= zoneCeiling && newArray[idx + freshIdx][4] >= zoneFloor && ((zoneFloor - newArray[idx + freshIdx][4])/zoneHeight >= 0.25)) {
                 isZoneFresh = false
-                console.log('ZONE IS NOT FRESH. The Price Went in More than 25% -- Lowest Price Above Zone Floor')
+
+                invalidZones.push([ {'incomingLeg': newArray[i]}, {'outgoingLeg': newArray[idx]}, {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'Not Fresh - Price Went in More than 25% -- Lowest Price Below Zone Ceiling'} ])
+
+                console.log('ZONE IS NOT FRESH. The Price Went in More than 25% -- Lowest Price Below Zone Ceiling')
               }
             }
           }
 
           if(isZoneFresh === true) {
-            arrayOfZones.push([ {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'fresh'}, {'incomingLeg': i}, {'outgoingLeg': idx} ])
+            freshZones.push([ {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'fresh'}, {'incomingLeg': i}, {'outgoingLeg': idx} ])
 
             //Set data to draw Zone in chart
             zoneData.push(potentialZone.map( bar => {return {'x': createDateTime(bar), 'high': zoneCeiling, 'low':  zoneFloor}}))
@@ -499,11 +522,14 @@ console.log('incomingLeg: ', i)
         {
           //Check for Attractor Zones
             //Create Array with the zoneFloor of all the Previous Supply Zones
-            let newArrayOfSupplyZones = arrayOfZones.filter(zone => zone[4]['formation'] === 'drop').map(dropZone => dropZone[2]['zoneFloor'])
+            let newArrayOfSupplyZones = freshZones.filter(zone => zone[4]['formation'] === 'drop').map(dropZone => dropZone[2]['zoneFloor'])
             //Check if the previous zoneFloors are over the current zoneCeiling and close enough to Zone
             for(let x = 0; x < newArrayOfSupplyZones.length; x++) {
               if (newArrayOfSupplyZones[x] >= zoneCeiling && ( (newArrayOfSupplyZones[x] - zoneCeiling) <= (zoneHeight * 2) ) ) {
                 supplyAttractorZoneFound = true
+
+                invalidZones.push([ {'incomingLeg': newArray[i]}, {'outgoingLeg': newArray[idx]}, {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'Invalid - Attractor Zone Found - Supply'} ])
+
                 console.log('Attractor Zone! Line 426')
               }
             }
@@ -517,17 +543,23 @@ console.log('incomingLeg: ', i)
                 console.log('The Price Returned on bar number: ', freshIdx + 1)
                 if(newArray[idx + freshIdx][3] >= zoneFloor && newArray[idx + freshIdx][3] <= zoneCeiling && ((newArray[idx + freshIdx][3] - zoneFloor)/zoneHeight >= 0.25)) {
                   isZoneFresh = false
+
+                  invalidZones.push([ {'incomingLeg': newArray[i]}, {'outgoingLeg': newArray[idx]}, {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'Not Fresh - Price Went in More than 25% -- Highest Price Above Zone Floor'} ])
+
                   console.log('ZONE IS NOT FRESH. The Price Went in More than 25% -- Highest Price Above Zone Floor')
                 } else if (newArray[idx + freshIdx][4] <= zoneCeiling && newArray[idx + freshIdx][4] >= zoneFloor && ((zoneFloor - newArray[idx + freshIdx][4])/zoneHeight >= 0.25)) {
                   isZoneFresh = false
-                  console.log('ZONE IS NOT FRESH. The Price Went in More than 25% -- Lowest Price Above Zone Floor')
+
+                  invalidZones.push([ {'incomingLeg': newArray[i]}, {'outgoingLeg': newArray[idx]}, {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'Not Fresh - Price Went in More than 25% -- Lowest Price Below Zone Ceiling'} ])
+
+                  console.log('ZONE IS NOT FRESH. The Price Went in More than 25% -- Lowest Price Below Zone Ceiling')
                 }
               }
             }
 
             if(isZoneFresh === true) {
 
-            arrayOfZones.push([ {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'fresh'}, {'incomingLeg': i}, {'outgoingLeg': idx} ])
+            freshZones.push([ {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'fresh'}, {'incomingLeg': i}, {'outgoingLeg': idx} ])
 
             //Set data to draw Zone in chart
             zoneData.push(potentialZone.map( bar => {return {'x': createDateTime(bar), 'high': zoneCeiling, 'low':  zoneFloor}}))
@@ -545,6 +577,9 @@ console.log('incomingLeg: ', i)
 
     }  else if (potentialZone.length > 6) {
       //There were more than 6 bases in between Incoming Leg and Outgoing Leg -- UNUSED
+
+        invalidZones.push([ {'incomingLeg': newArray[i]}, {'outgoingLeg': newArray[idx]}, {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'Unused - More than 6 Bars Between Legs'} ])
+
         potentialZone = []
         invalidIncomingLeg = false
         zoneInvalidatedByLegBases = false
@@ -573,7 +608,9 @@ console.log('incomingLeg: ', i)
     "close": bar[5]}
   })
 
-  export const finalPotentialZones = arrayOfZones
+  export const finalPotentialZones = freshZones
+
+  export const finalInvalidZones = invalidZones
 
   export const baseMarkers = actualBases.map( base => {
       return {'x': base,
