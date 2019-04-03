@@ -50,6 +50,9 @@ let invalidIncomingLeg = false
 let percentageInsideZone
 let candlestickSizeOutsideZone = 0
 let isZoneFresh = true
+let averageTrueRange = 0
+let barAfterPositionOpens = 0
+let checkPriceAfterPositionOpens= false
 
 //Set initial ceiling and floor based on direction of first bar
   if (newArray[0][5] - newArray[0][2] >= 0) {
@@ -146,6 +149,43 @@ export const finalData = newArray.map( bar => {
 } else {
 
   //After the third Bar, start looking back in time
+
+
+
+  //Check if the Price returns to a Fresh, Open Zone
+  if (freshZones.length > 0) {
+    for (let x = 0; x < freshZones.length; x++) {
+      //Check if Price returns in a Rally
+      if(freshZones[x]['formation'] === 'rally' && bar[4] <= freshZones[x]['entryPrice']) {
+        barAfterPositionOpens = barAfterPositionOpens + 1
+
+        if (barAfterPositionOpens === 3) {
+          checkPriceAfterPositionOpens = true
+          barAfterPositionOpens = 0
+        }
+
+        console.log('RALLY-- The price returned to Zone #', x)
+        console.log('Bar: ', bar)
+        console.log('Index: ', idx)
+        console.log('zone: ', freshZones[x])
+      }
+
+      //Check if Price returns in a Drop
+      if(freshZones[x]['formation'] === 'drop' && bar[3] >= freshZones[x]['entryPrice']) {
+        barAfterPositionOpens = barAfterPositionOpens + 1
+
+        if (barAfterPositionOpens === 3) {
+          checkPriceAfterPositionOpens = true
+          barAfterPositionOpens = 0
+        }
+        console.log('DROP-- The price returned to Zone #', x)
+        console.log('Bar: ', bar)
+        console.log('Index: ', idx)
+        console.log('zone: ', freshZones[x])
+      }
+    }
+  }
+
 
   //Is it a leg?
   if (idx >= 3 && isItALeg(bar)) {
@@ -442,7 +482,7 @@ export const finalData = newArray.map( bar => {
           //Check for Attractor Zones
             //Create Array with the ZoneCeiling of all the Previous Rally Zones
 
-            let newArrayOfZones = freshZones.filter(zone => zone[4]['formation'] === 'rally').map(rallyZone => rallyZone[1]['zoneCeiling'])
+            let newArrayOfZones = freshZones.filter(zone => zone['formation'] === 'rally').map(rallyZone => rallyZone['zoneCeiling'])
             //Check if the previous zoneCeilings are under the current zoneFloor and close enough to Zone
             for(let x = 0; x < newArrayOfZones.length; x++) {
               if (newArrayOfZones[x] <= zoneFloor && ( (zoneFloor - newArrayOfZones[x]) <= (zoneHeight * 2) ) ) {
@@ -464,24 +504,33 @@ export const finalData = newArray.map( bar => {
           for (let freshIdx = 0; freshIdx < 5; freshIdx++) {
             if (newArray[idx + freshIdx][3] >= zoneFloor &&  newArray[idx + freshIdx][4] <= zoneCeiling) {
               console.log('The Price Returned on bar number: ', freshIdx + 1)
+              console.log('zoneCeiling: ', zoneCeiling)
+              console.log('Bar Lowest Prince: ', newArray[idx + freshIdx][4])
+              console.log('Zone Height: ', zoneHeight)
+
               if(newArray[idx + freshIdx][3] >= zoneFloor && newArray[idx + freshIdx][3] <= zoneCeiling && ((newArray[idx + freshIdx][3] - zoneFloor)/zoneHeight >= 0.25)) {
                 isZoneFresh = false
 
                 invalidZones.push([ {'incomingLeg': newArray[i]}, {'outgoingLeg': newArray[idx]}, {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'Not Fresh - Price Went in More than 25% -- Highest Price Above Zone Floor'} ])
 
                 console.log('ZONE IS NOT FRESH. The Price Went in More than 25% -- Highest Price Above Zone Floor')
-              } else if (newArray[idx + freshIdx][4] <= zoneCeiling && newArray[idx + freshIdx][4] >= zoneFloor && ((zoneFloor - newArray[idx + freshIdx][4])/zoneHeight >= 0.25)) {
+
+                break
+
+              } else if (newArray[idx + freshIdx][4] <= zoneCeiling && newArray[idx + freshIdx][4] >= zoneFloor && ((zoneCeiling - newArray[idx + freshIdx][4])/zoneHeight >= 0.25)) {
                 isZoneFresh = false
 
                 invalidZones.push([ {'incomingLeg': newArray[i]}, {'outgoingLeg': newArray[idx]}, {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'Not Fresh - Price Went in More than 25% -- Lowest Price Below Zone Ceiling'} ])
 
                 console.log('ZONE IS NOT FRESH. The Price Went in More than 25% -- Lowest Price Below Zone Ceiling')
+
+                break
               }
             }
           }
 
           if(isZoneFresh === true) {
-            freshZones.push([ {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'fresh'}, {'incomingLeg': i}, {'outgoingLeg': idx} ])
+            freshZones.push({'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'fresh', 'incomingLeg': i, 'outgoingLeg': idx, 'targetPrice': zoneCeiling + (zoneHeight * 3), 'entryPrice': zoneCeiling + (averageTrueRange * 0.01), 'stopPrice': zoneFloor - (averageTrueRange * 0.02)})
 
             //Set data to draw Zone in chart
             zoneData.push(potentialZone.map( bar => {return {'x': createDateTime(bar), 'high': zoneCeiling, 'low':  zoneFloor}}))
@@ -522,7 +571,7 @@ export const finalData = newArray.map( bar => {
         {
           //Check for Attractor Zones
             //Create Array with the zoneFloor of all the Previous Supply Zones
-            let newArrayOfSupplyZones = freshZones.filter(zone => zone[4]['formation'] === 'drop').map(dropZone => dropZone[2]['zoneFloor'])
+            let newArrayOfSupplyZones = freshZones.filter(zone => zone['formation'] === 'drop').map(dropZone => dropZone['zoneFloor'])
             //Check if the previous zoneFloors are over the current zoneCeiling and close enough to Zone
             for(let x = 0; x < newArrayOfSupplyZones.length; x++) {
               if (newArrayOfSupplyZones[x] >= zoneCeiling && ( (newArrayOfSupplyZones[x] - zoneCeiling) <= (zoneHeight * 2) ) ) {
@@ -559,7 +608,7 @@ export const finalData = newArray.map( bar => {
 
             if(isZoneFresh === true) {
 
-            freshZones.push([ {'bases': potentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'fresh'}, {'incomingLeg': i}, {'outgoingLeg': idx} ])
+            freshZones.push({'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'fresh', 'incomingLeg': i, 'outgoingLeg': idx, 'targetPrice': zoneFloor - (zoneHeight * 3), 'entryPrice': zoneFloor - (averageTrueRange * 0.01), 'stopPrice': zoneCeiling + (averageTrueRange * 0.02)})
 
             //Set data to draw Zone in chart
             zoneData.push(potentialZone.map( bar => {return {'x': createDateTime(bar), 'high': zoneCeiling, 'low':  zoneFloor}}))
