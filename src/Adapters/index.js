@@ -153,34 +153,52 @@ export const finalData = newArray.map( bar => {
 
   //After the third Bar, start looking back in time
 
-
   //Check Open Positions
   if(positionArray.length > 0) {
     for (let z = 0; z < positionArray.length; z++) {
 
-      //Check if an Open Position Should Be Closed Successfully
-      if (positionArray[z]['positionStatus'] === 'open' && bar[4] <= positionArray[z]['stopPrice']) {
+      //Check if an Open Position Should Be Closed Because it Hit the Stop - Rally
+      if (positionArray[z]['zoneFormation'] === 'rally' && positionArray[z]['positionStatus'] === 'open' && bar[4] <= positionArray[z]['stopPrice']) {
+
         positionArray[z]['positionStatus'] = 'closed'
         positionArray[z]['type'] = 'hit stop'
         stopBars.push(dateTime)
-        console.log('PRICE HIT THE STOP!')
+        console.log('PRICE HIT THE STOP ON RALLY!')
       }
-
-      else if(positionArray[z]['positionStatus'] === 'open' && bar[3] >= positionArray[z]['targetPrice']) {
+      //Check if an Open Position Should Be Closed Successfully - Rally
+      else if (positionArray[z]['zoneFormation'] === 'rally' && positionArray[z]['positionStatus'] === 'open' && bar[3] >= positionArray[z]['targetPrice']) {
         positionArray[z]['positionStatus'] = 'closed'
         positionArray[z]['type'] = 'success'
         priceReturnedBars.push(dateTime)
-        console.log('SUCCESS!!! The price reached the Target Price (T3)')
+        console.log('SUCCESS!!! The price reached the Target Price (T3) - Rally')
         console.log('ID: ', idx)
         console.log('Bar: ', bar)
       }
 
-      if (positionArray[z]['barsAfterPositionOpens'] < 1) {
-        positionArray[z]['barsAfterPositionOpens'] = positionArray[z]['barsAfterPositionOpens'] + 1
-      } else if ((positionArray[z]['barsAfterPositionOpens'] === 1) && (positionArray[z]['positionStatus'] === 'unfilled')) {
+      //Check if an Open Position Should Be Closed Because it Hit the Stop - Drop
+      if (positionArray[z]['zoneFormation'] === 'drop' && positionArray[z]['positionStatus'] === 'open' && bar[3] >= positionArray[z]['stopPrice']) {
 
-        //Rally
-        if(bar[4] > positionArray[z]['entryPrice']) {
+        positionArray[z]['positionStatus'] = 'closed'
+        positionArray[z]['type'] = 'hit stop'
+        stopBars.push(dateTime)
+        console.log('PRICE HIT THE STOP ON DROP!')
+      }
+      //Check if an Open Position Should Be Closed Successfully - Drop
+      else if (positionArray[z]['zoneFormation'] === 'drop' && positionArray[z]['positionStatus'] === 'open' && bar[4] <= positionArray[z]['targetPrice']) {
+        positionArray[z]['positionStatus'] = 'closed'
+        positionArray[z]['type'] = 'success'
+        priceReturnedBars.push(dateTime)
+        console.log('SUCCESS!!! The price reached the Target Price (T3) - Drop')
+        console.log('ID: ', idx)
+        console.log('Bar: ', bar)
+      }
+
+      if (positionArray[z]['barsAfterPositionOpens'] < 2) {
+        positionArray[z]['barsAfterPositionOpens'] = positionArray[z]['barsAfterPositionOpens'] + 1
+      } else if ((positionArray[z]['barsAfterPositionOpens'] === 2) && (positionArray[z]['positionStatus'] === 'unfilled')) {
+
+        //Rally or Drop
+        if(bar[4] > positionArray[z]['entryPrice'] || bar[3] < positionArray[z]['entryPrice']) {
         positionArray[z]['positionStatus'] = 'open'
         //Move the Stop Price to the Entry Price
         positionArray[z]['stopPrice'] = positionArray[z]['entryPrice']
@@ -203,24 +221,25 @@ export const finalData = newArray.map( bar => {
   //Check if the Price returns to a Fresh, Open Zone
   if (freshZones.length > 0) {
     for (let x = 0; x < freshZones.length; x++) {
+
       //Check if Price returns in a Rally
-      if(freshZones[x]['formation'] === 'rally' && bar[4] <= freshZones[x]['entryPrice']) {
-        if (positionArray.length === 0) {
-          positionArray.push({'freshZoneIndex': x, 'entryPrice': freshZones[x]['entryPrice'], 'targetPrice': freshZones[x]['targetPrice'], 'stopPrice': freshZones[x]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'positionType': '', 'priceReturnedId': idx } )
-        }
+      if(freshZones[x]['formation'] === 'rally' && bar[4] <= freshZones[x]['entryPrice'] && freshZones[x]['position']=== false) {
+          positionArray.push({'freshZoneIndex': x, 'entryPrice': freshZones[x]['entryPrice'], 'targetPrice': freshZones[x]['targetPrice'], 'stopPrice': freshZones[x]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'positionType': '', 'priceReturnedId': idx, 'zoneFormation': freshZones[x]['formation'] } )
+
+          freshZones[x]['position'] = true
+
         console.log('RALLY-- The price returned to Zone #', x)
         console.log('Bar: ', bar)
         console.log('Index: ', idx)
         console.log('zone: ', freshZones[x])
       }
       //Check if Price returns in a Drop
-      if(freshZones[x]['formation'] === 'drop' && bar[3] >= freshZones[x]['entryPrice']) {
-        barAfterPositionOpens = barAfterPositionOpens + 1
+      if(freshZones[x]['formation'] === 'drop' && bar[3] >= freshZones[x]['entryPrice'] && freshZones[x]['position'] === false) {
 
-        if (barAfterPositionOpens === 3) {
-          checkPriceAfterPositionOpens = true
-          barAfterPositionOpens = 0
-        }
+          positionArray.push({'freshZoneIndex': x, 'entryPrice': freshZones[x]['entryPrice'], 'targetPrice': freshZones[x]['targetPrice'], 'stopPrice': freshZones[x]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'positionType': '', 'priceReturnedId': idx, 'zoneFormation': freshZones[x]['formation'] } )
+
+          freshZones[x]['position'] = true
+
         console.log('DROP-- The price returned to Zone #', x)
         console.log('Bar: ', bar)
         console.log('Index: ', idx)
@@ -228,8 +247,6 @@ export const finalData = newArray.map( bar => {
       }
     }
   }
-
-
 
   //Is it a leg?
   if (idx >= 3 && isItALeg(bar)) {
@@ -574,7 +591,7 @@ export const finalData = newArray.map( bar => {
           }
 
           if(isZoneFresh === true) {
-            freshZones.push({'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'fresh', 'incomingLeg': i, 'outgoingLeg': idx, 'targetPrice': zoneCeiling + (zoneHeight * 3), 'entryPrice': zoneCeiling + (averageTrueRange * 0.01), 'stopPrice': zoneFloor - (averageTrueRange * 0.02)})
+            freshZones.push({'position': false, 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'fresh', 'incomingLeg': i, 'outgoingLeg': idx, 'targetPrice': zoneCeiling + (zoneHeight * 3), 'entryPrice': zoneCeiling + (averageTrueRange * 0.01), 'stopPrice': zoneFloor - (averageTrueRange * 0.02)})
 
             //Set data to draw Zone in chart
             zoneData.push(potentialZone.map( bar => {return {'x': createDateTime(bar), 'high': zoneCeiling, 'low':  zoneFloor}}))
@@ -652,7 +669,7 @@ export const finalData = newArray.map( bar => {
 
             if(isZoneFresh === true) {
 
-            freshZones.push({'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'fresh', 'incomingLeg': i, 'outgoingLeg': idx, 'targetPrice': zoneFloor - (zoneHeight * 3), 'entryPrice': zoneFloor - (averageTrueRange * 0.01), 'stopPrice': zoneCeiling + (averageTrueRange * 0.02)})
+            freshZones.push({'position': false, 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'fresh', 'incomingLeg': i, 'outgoingLeg': idx, 'targetPrice': zoneFloor - (zoneHeight * 3), 'entryPrice': zoneFloor - (averageTrueRange * 0.01), 'stopPrice': zoneCeiling + (averageTrueRange * 0.02)})
 
             //Set data to draw Zone in chart
             zoneData.push(potentialZone.map( bar => {return {'x': createDateTime(bar), 'high': zoneCeiling, 'low':  zoneFloor}}))
@@ -705,6 +722,8 @@ export const finalData = newArray.map( bar => {
 
   export const finalInvalidZones = invalidZones
 
+  export const finalPositions = positionArray
+
   export const baseMarkers = actualBases.map( base => {
       return {'x': base,
       'title': ' '}
@@ -717,7 +736,7 @@ export const finalData = newArray.map( bar => {
 
     export const stopMarker = stopBars.map ( bar =>  {
       return {'x': bar,
-      'title': ' '}
+      'title': 'S '}
     })
 
 export const options = {
@@ -779,7 +798,7 @@ export const options = {
     data: stopMarker,
     onSeries: 'candlestick',
    shape: 'circlepin',
-   width: 2,
+   width: 8,
    fillColor: 'red'
   },
               {
