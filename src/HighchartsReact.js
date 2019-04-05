@@ -16,6 +16,7 @@ export default class HighchartsReact extends React.PureComponent {
       props.options,
       props.callback ? props.callback : undefined
     );
+    // this.renderLine(1547632800000, 2653.25, 100, 2)
     // this.renderRectangle()
   }
 
@@ -36,10 +37,17 @@ export default class HighchartsReact extends React.PureComponent {
     }
   }
 
+  // renderLine(x, y, width, height) {
+  //    this.chart.renderer.symbols.vline =
+  //       function(x, y, width, height) {
+  //         return ['M',x ,y + width / 2,'L',x+height,y + width / 2];
+  //       }
+  //     }
+
   // renderRectangle() {
   //   const xAxis = this.chart.xAxis[0];
   //   const yAxis = this.chart.yAxis[0];
-  //   const rectangle = this.chart.renderer.rect(xAxis.toPixels(1545058800000), yAxis.toPixels(1250), 50, 20, 5)
+  //   const rectangle = this.chart.renderer.rect(xAxis.toPixels(1547632800000), yAxis.toPixels(2670), 5000, 1, 1)
   //       .attr({
   //           'stroke-width': 2,
   //           stroke: 'red',
