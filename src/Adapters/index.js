@@ -155,61 +155,60 @@ export const finalData = newArray.map( bar => {
   //Check Bar for Potential Fresh Zone
 
   //Check to see if the price returns to Zone in all the open potential Zones
-  for (let q = 0; q < potentialFreshZones.length; q++) {
+  const newPotentialFreshArray = [...potentialFreshZones]
+
+  newPotentialFreshArray.forEach ( zone =>  {
+console.log('zone: ', zone)
 
     //Check in Rally
-    if (potentialFreshZones[q]['type'] === 'checking for fresh' && potentialFreshZones[q]['formation'] === 'rally'){
-      potentialFreshZones[q]['isItFreshBars'] = potentialFreshZones[q]['isItFreshBars'] + 1
+    if (zone['type'] === 'checking for fresh' && zone['formation'] === 'rally'){
+      zone['isItFreshBars'] = zone['isItFreshBars'] + 1
 
       //Check if Price Returned to Zone
       if (bar[3] >= zoneFloor && bar[4] <= zoneCeiling) {
 
-        potentialFreshZones[q]['priceReturnedToZone'] = potentialFreshZones[q]['priceReturnedToZone'] + 1
+        zone['priceReturnedToZone'] = zone['priceReturnedToZone'] + 1
 
-        console.log('The Price Returned on bar number: ', potentialFreshZones[q]['isItFreshBars'])
-        console.log('Zone: ', potentialFreshZones[q])
-        console.log('zoneCeiling: ', potentialFreshZones[q]['zoneCeiling'])
+        console.log('The Price Returned on bar number: ', zone['isItFreshBars'])
+        console.log('Zone: ', zone)
+        console.log('zoneCeiling: ', zone['zoneCeiling'])
         console.log('Bar Lowest Price: ', bar[4])
-        console.log('Zone Height: ', potentialFreshZones[q]['zoneHeight'])
+        console.log('Zone Height: ', zone['zoneHeight'])
 
-        if (potentialFreshZones[q]['priceReturnedToZone'] > 1) {
+        if (zone['priceReturnedToZone'] > 1) {
 
-          potentialFreshZones[q]['type'] = 'Not Fresh - Price Returned to Zone More than Once'
+          zone['type'] = 'Not Fresh - Price Returned to Zone More than Once'
 
-          invalidZones.push(potentialFreshZones[q])
+          invalidZones.push(zone)
 
-          potentialFreshZones.splice(q, 1)
+          potentialFreshZones.splice(potentialFreshZones.indexOf(zone), 1)
 
           console.log('ZONE IS NOT FRESH. The Price Returned to Zone More than Once - Rally')
+        } else if ( bar[4] <= zone['zoneCeiling'] && ((zone['zoneCeiling'] - bar[4])/zone['zoneHeight'] > 0.25)) {
 
-          break
+          zone['type'] = 'Not Fresh - Price Went in More than 25% -- Highest Price Above Zone Floor'
 
-        } else if ( bar[4] <= potentialFreshZones[q]['zoneCeiling'] && ((potentialFreshZones[q]['zoneCeiling'] - bar[4])/potentialFreshZones[q]['zoneHeight'] > 0.25)) {
+          invalidZones.push(zone)
 
-          potentialFreshZones[q]['type'] = 'Not Fresh - Price Went in More than 25% -- Highest Price Above Zone Floor'
-
-          invalidZones.push(potentialFreshZones[q])
-
-          potentialFreshZones.splice(q, 1)
+          potentialFreshZones.splice(potentialFreshZones.indexOf(zone), 1)
 
           console.log('ZONE IS NOT FRESH. The Price Went in More than 25% -- Rally')
-          break
         }
       }
 
       //If it's untouched for 5 bars, it's Fresh
-        if (potentialFreshZones[q]['isItFreshBars'] === 5) {
-          potentialFreshZones[q]['type'] = 'fresh'
+        else if (zone && zone['isItFreshBars'] === 5) {
+          zone['type'] = 'fresh'
 
-          potentialFreshZones[q]['targetPrice'] = zoneCeiling + (zoneHeight * 3)
-          potentialFreshZones[q]['entryPrice'] = zoneCeiling + (averageTrueRange * 0.01)
-          potentialFreshZones[q]['stopPrice'] = zoneFloor - (averageTrueRange * 0.02)
+          zone['targetPrice'] = zoneCeiling + (zoneHeight * 3)
+          zone['entryPrice'] = zoneCeiling + (averageTrueRange * 0.01)
+          zone['stopPrice'] = zoneFloor - (averageTrueRange * 0.02)
 
-          freshZones.push(potentialFreshZones[q])
+          freshZones.push(zone)
 
           //Set data to draw Zone in chart
 
-          zoneData.push(potentialFreshZones[q]['bases'].map( bar => {return {'x': createDateTime(bar), 'high': potentialFreshZones[q]['zoneCeiling'], 'low':  potentialFreshZones[q]['zoneFloor']}}))
+          zoneData.push(zone['bases'].map( bar => {return {'x': createDateTime(bar), 'high': zone['zoneCeiling'], 'low':  zone['zoneFloor']}}))
 
           //Set data to draw lines signaling fresh zone
           // zoneLines.push(zoneCeiling)
@@ -218,61 +217,56 @@ export const finalData = newArray.map( bar => {
           zoneCeiling = undefined
           zoneFloor = undefined
 
-        console.log('FRESH ZONE! In a Rally', potentialFreshZones[q])
+        console.log('FRESH ZONE! In a Rally', zone)
         }
       }
 
       //Check if Price Returns to Zone or if Zone is Fresh - Drop
-      if (potentialFreshZones[q]['type'] === 'checking for fresh' && potentialFreshZones[q]['formation'] === 'drop'){
-      potentialFreshZones[q]['isItFreshBars'] = potentialFreshZones[q]['isItFreshBars'] + 1
+      if (zone && zone['type'] === 'checking for fresh' && zone['formation'] === 'drop'){
+      zone['isItFreshBars'] = zone['isItFreshBars'] + 1
 
       //Check if Price Returned to Zone
       if (bar[3] >= zoneFloor && bar[4] <= zoneCeiling) {
-        potentialFreshZones[q]['priceReturnedToZone'] = potentialFreshZones[q]['priceReturnedToZone'] + 1
+        zone['priceReturnedToZone'] = zone['priceReturnedToZone'] + 1
 
-        console.log('The Price Returned on bar number: ', potentialFreshZones[q]['isItFreshBars'])
-        console.log('zoneCeiling: ', potentialFreshZones[q]['zoneCeiling'])
+        console.log('The Price Returned on bar number: ', zone['isItFreshBars'])
+        console.log('zoneCeiling: ', zone['zoneCeiling'])
         console.log('Bar Highest Price: ', bar[3])
-        console.log('Zone Height: ', potentialFreshZones[q]['zoneHeight'])
+        console.log('Zone Height: ', zone['zoneHeight'])
 
-        if (potentialFreshZones[q]['priceReturnedToZone'] > 1) {
+        if (zone['priceReturnedToZone'] > 1) {
 
-          potentialFreshZones[q]['type'] = 'Not Fresh - Price Returned to Zone More than Once'
+          zone['type'] = 'Not Fresh - Price Returned to Zone More than Once'
 
-          invalidZones.push(potentialFreshZones[q])
+          invalidZones.push(zone)
 
-          potentialFreshZones.splice(q, 1)
+          potentialFreshZones.splice(potentialFreshZones.indexOf(zone), 1)
 
           console.log('ZONE IS NOT FRESH. The Price Returned to Zone More than Once - Drop')
+        } else if (bar[3] >= zone['zoneFloor'] && ((bar[3] - zone['zoneFloor'])/zone['zoneHeight'] > 0.25)) {
 
-          break
+          zone['type'] = 'Not Fresh - Price Went in More than 25% -- Highest Price Above Zone Floor'
 
-        } else if (bar[3] >= potentialFreshZones[q]['zoneFloor'] && ((bar[3] - potentialFreshZones[q]['zoneFloor'])/potentialFreshZones[q]['zoneHeight'] > 0.25)) {
+          invalidZones.push(zone)
 
-          potentialFreshZones[q]['type'] = 'Not Fresh - Price Went in More than 25% -- Highest Price Above Zone Floor'
-
-          invalidZones.push(potentialFreshZones[q])
-
-          potentialFreshZones.splice(q, 1)
+          potentialFreshZones.splice(potentialFreshZones.indexOf(zone), 1)
 
           console.log('ZONE IS NOT FRESH. The Price Went in More than 25% -- Drop')
-
-          break
         }
       }
 
       //If it's untouched for 5 bars, it's Fresh
-        if (potentialFreshZones[q]['isItFreshBars'] === 5) {
-          potentialFreshZones[q]['type'] = 'fresh'
+        else if (zone['isItFreshBars'] === 5) {
+          zone['type'] = 'fresh'
 
-          potentialFreshZones[q]['targetPrice'] = zoneFloor - (zoneHeight * 3)
-          potentialFreshZones[q]['entryPrice'] = zoneFloor - (averageTrueRange * 0.01)
-          potentialFreshZones[q]['stopPrice'] = zoneCeiling + (averageTrueRange * 0.02)
+          zone['targetPrice'] = zoneFloor - (zoneHeight * 3)
+          zone['entryPrice'] = zoneFloor - (averageTrueRange * 0.01)
+          zone['stopPrice'] = zoneCeiling + (averageTrueRange * 0.02)
 
-          freshZones.push(potentialFreshZones[q])
+          freshZones.push(zone)
 
           //Set data to draw Zone in chart
-          zoneData.push(potentialFreshZones[q]['bases'].map( bar => {return {'x': createDateTime(bar), 'high': potentialFreshZones[q]['zoneCeiling'], 'low':  potentialFreshZones[q]['zoneFloor']}}))
+          zoneData.push(zone['bases'].map( bar => {return {'x': createDateTime(bar), 'high': zone['zoneCeiling'], 'low':  zone['zoneFloor']}}))
 
           //Set data to draw lines signaling fresh zone
           // zoneLines.push(zoneCeiling)
@@ -281,10 +275,10 @@ export const finalData = newArray.map( bar => {
           zoneCeiling = undefined
           zoneFloor = undefined
 
-        console.log('FRESH ZONE! In a Drop', potentialFreshZones[q])
+        console.log('FRESH ZONE! In a Drop', zone)
         }
-    }
-  }
+      }
+    })
 
 console.log('About to Check position! positionArray: ', positionArray)
   //Check Open Positions
@@ -595,7 +589,6 @@ console.log('About to Check position! positionArray: ', positionArray)
               invalidZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because Leg-Base Candlestick Outside Zone Ceiling - Demand'})
 
               console.log('Invalidated by Leg Bases 1')
-              break
             }
 
             // Check if candlestick of the Leg-Base is higher than the ceiling of the Potential Supply Zone
