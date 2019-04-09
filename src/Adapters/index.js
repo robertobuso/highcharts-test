@@ -167,6 +167,7 @@ export const finalData = newArray.map( bar => {
         potentialFreshZones[q]['priceReturnedToZone'] = potentialFreshZones[q]['priceReturnedToZone'] + 1
 
         console.log('The Price Returned on bar number: ', potentialFreshZones[q]['isItFreshBars'])
+        console.log('Zone: ', potentialFreshZones[q])
         console.log('zoneCeiling: ', potentialFreshZones[q]['zoneCeiling'])
         console.log('Bar Lowest Price: ', bar[4])
         console.log('Zone Height: ', potentialFreshZones[q]['zoneHeight'])
@@ -180,6 +181,7 @@ export const finalData = newArray.map( bar => {
           potentialFreshZones.splice(q, 1)
 
           console.log('ZONE IS NOT FRESH. The Price Returned to Zone More than Once - Rally')
+
           break
 
         } else if ( bar[4] <= potentialFreshZones[q]['zoneCeiling'] && ((potentialFreshZones[q]['zoneCeiling'] - bar[4])/potentialFreshZones[q]['zoneHeight'] > 0.25)) {
@@ -699,13 +701,13 @@ console.log('About to Check position! positionArray: ', positionArray)
             }
 
           if (demandAttractorZoneFound === false) {
-            console.log('Inserting Zone into potentialFreshZones. Line 695')
+            console.log('POTENTIAL FRESH ZONE RALLY! Inserting Zone into potentialFreshZones. Line 703')
+
           //Insert New Potential Zone into Array to Check if It's Fresh
             potentialFreshZones.push( {'position': false, 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'checking for fresh', 'incomingLeg': i, 'outgoingLeg': idx, 'isItFreshBars': 1} )
 
             //Does the Outgoing Leg return to the zone?
             if (newArray[idx][3] >= zoneFloor && newArray[idx][4] <= zoneCeiling) {
-
               potentialFreshZones[potentialFreshZones.length -1]['priceReturnedToZone'] = 1
             }
           }
@@ -721,11 +723,6 @@ console.log('About to Check position! positionArray: ', positionArray)
         barDistanceFromSupplyZone = zoneFloor - bar[4]
         groupDistanceFromSupplyZone =  zoneFloor - lowestPriceInExplosiveGroup
         zoneHeight = zoneCeiling - zoneFloor
-
-        console.log('IDS: ', i, idx)
-        console.log('Potential Zone: ', potentialZone)
-        console.log('Explosive Group: ', explosiveGroup)
-        console.log('Lowest Price in Explosive Group: ', lowestPriceInExplosiveGroup)
 
         //Is this Drop Explosive?
         if (formation === 'drop' && (
@@ -768,6 +765,7 @@ console.log('About to Check position! positionArray: ', positionArray)
             }
 
           if (supplyAttractorZoneFound === false) {
+            console.log('POTENTIAL FRESH ZONE DROP! Inserting into potentialFreshZones array.')
 
           //Insert New Potential Zone into Array to Check if It's Fresh
             potentialFreshZones.push( {'position': false, 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'checking for fresh', 'incomingLeg': i, 'outgoingLeg': idx, 'isItFreshBars': 1} )
@@ -776,11 +774,6 @@ console.log('About to Check position! positionArray: ', positionArray)
           if (newArray[idx][3] >= zoneFloor && newArray[idx][4] <= zoneCeiling) {
 
             potentialFreshZones[potentialFreshZones.length -1]['priceReturnedToZone'] = 1
-
-            console.log('The Price Returned on bar number: ', potentialFreshZones[potentialFreshZones.length -1]['isItFreshBars'])
-            console.log('zoneCeiling: ', potentialFreshZones[potentialFreshZones.length -1]['zoneCeiling'])
-            console.log('Bar Highest Price: ', newArray[idx][3])
-            console.log('Zone Height: ', potentialFreshZones[potentialFreshZones.length -1]['zoneHeight'])
           }
         }
       } else {
@@ -788,10 +781,10 @@ console.log('About to Check position! positionArray: ', positionArray)
           console.log('This Drop is NOT explosive.')
         }
       }
-      // Finished setting Potential Zone, leave loop to return data for chart below
-      i = i - 1
     }
+    // Finished setting Potential Zone, leave loop to return data for chart below
       i = i - 1
+      console.log('Line 805')
   }
       //This is when invalidIncomingLeg === true
 
