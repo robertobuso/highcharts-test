@@ -53,6 +53,7 @@ let averageTrueRange = 0
 let positionArray = []
 let priceReturnedBars = []
 let stopBars = []
+let positionClosedZone = []
 let zoneLines = []
 let potentialFreshZones = []
 
@@ -199,10 +200,9 @@ console.log('zone: ', zone)
       //If it's untouched for 5 bars, it's Fresh
         else if (zone && zone['isItFreshBars'] === 5) {
           zone['type'] = 'fresh'
-
-          zone['targetPrice'] = zoneCeiling + (zoneHeight * 3)
-          zone['entryPrice'] = zoneCeiling + (averageTrueRange * 0.01)
-          zone['stopPrice'] = zoneFloor - (averageTrueRange * 0.02)
+          zone['targetPrice'] = zone['zoneCeiling'] + (zone['zoneHeight'] * 3)
+          zone['entryPrice'] = zone['zoneCeiling'] + (averageTrueRange * 0.01)
+          zone['stopPrice'] = zone['zoneFloor'] - (averageTrueRange * 0.02)
 
           freshZones.push(zone)
 
@@ -259,9 +259,9 @@ console.log('zone: ', zone)
         else if (zone['isItFreshBars'] === 5) {
           zone['type'] = 'fresh'
 
-          zone['targetPrice'] = zoneFloor - (zoneHeight * 3)
-          zone['entryPrice'] = zoneFloor - (averageTrueRange * 0.01)
-          zone['stopPrice'] = zoneCeiling + (averageTrueRange * 0.02)
+          zone['targetPrice'] = zone['zoneFloor'] - (zone['zoneHeight'] * 3)
+          zone['entryPrice'] = zone['zoneFloor'] - (averageTrueRange * 0.01)
+          zone['stopPrice'] = zone['zoneCeiling'] + (averageTrueRange * 0.02)
 
           freshZones.push(zone)
 
@@ -281,6 +281,9 @@ console.log('zone: ', zone)
     })
 
 console.log('About to Check position! positionArray: ', positionArray)
+console.log('Were checking bar: ', bar)
+console.log('The ID is: ', idx)
+
   //Check Open Positions
   if(positionArray.length > 0) {
     for (let z = 0; z < positionArray.length; z++) {
@@ -293,6 +296,7 @@ console.log('About to Check position! positionArray: ', positionArray)
         stopBars.push(dateTime)
         console.log('PRICE HIT THE STOP ON RALLY!')
       }
+
       //Check if an Open Position Should Be Closed Successfully - Rally
       else if (positionArray[z]['zoneFormation'] === 'rally' && positionArray[z]['positionStatus'] === 'open' && bar[3] >= positionArray[z]['targetPrice']) {
         positionArray[z]['positionStatus'] = 'closed'
@@ -311,6 +315,7 @@ console.log('About to Check position! positionArray: ', positionArray)
         stopBars.push(dateTime)
         console.log('PRICE HIT THE STOP ON DROP!')
       }
+
       //Check if an Open Position Should Be Closed Successfully - Drop
       else if (positionArray[z]['zoneFormation'] === 'drop' && positionArray[z]['positionStatus'] === 'open' && bar[4] <= positionArray[z]['targetPrice']) {
         positionArray[z]['positionStatus'] = 'closed'
@@ -321,9 +326,10 @@ console.log('About to Check position! positionArray: ', positionArray)
         console.log('Bar: ', bar)
       }
 
-      if (positionArray[z]['barsAfterPositionOpens'] < 2) {
+      //Check if a position should be Opened or Closed - depending on whether the price is inside the Zone on the third bar after triggering position
+      if (positionArray[z]['barsAfterPositionOpens'] < 1) {
         positionArray[z]['barsAfterPositionOpens'] = positionArray[z]['barsAfterPositionOpens'] + 1
-      } else if ((positionArray[z]['barsAfterPositionOpens'] === 2) && (positionArray[z]['positionStatus'] === 'unfilled')) {
+      } else if ((positionArray[z]['barsAfterPositionOpens'] === 1) && (positionArray[z]['positionStatus'] === 'unfilled')) {
 
         //Rally or Drop
         if(bar[4] > positionArray[z]['entryPrice'] || bar[3] < positionArray[z]['entryPrice']) {
@@ -339,6 +345,7 @@ console.log('About to Check position! positionArray: ', positionArray)
       } else {
         positionArray[z]['positionStatus'] = 'closed'
         positionArray[z]['type'] = 'price in zone after 3 bars'
+        positionClosedZone.push(dateTime)
         console.log('POSITION IS CLOSED: The price was inside the Zone in the third bar.')
       }
         console.log('Third Bar After Price ReEnters Zone: ', bar[4])
@@ -356,7 +363,7 @@ console.log('About to Check position! positionArray: ', positionArray)
 
       //Check if Price returns in a Rally
       if(freshZones[x]['formation'] === 'rally' && bar[4] <= freshZones[x]['entryPrice'] && freshZones[x]['position']=== false) {
-          positionArray.push({'freshZoneIndex': x, 'entryPrice': freshZones[x]['entryPrice'], 'targetPrice': freshZones[x]['targetPrice'], 'stopPrice': freshZones[x]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'positionType': '', 'priceReturnedId': idx, 'zoneFormation': freshZones[x]['formation'] } )
+          positionArray.push({'freshZoneIndex': x, 'entryPrice': freshZones[x]['entryPrice'], 'targetPrice': freshZones[x]['targetPrice'], 'stopPrice': freshZones[x]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': freshZones[x]['formation'] } )
 
           freshZones[x]['position'] = true
 
@@ -368,7 +375,7 @@ console.log('About to Check position! positionArray: ', positionArray)
       //Check if Price returns in a Drop
       if(freshZones[x]['formation'] === 'drop' && bar[3] >= freshZones[x]['entryPrice'] && freshZones[x]['position'] === false) {
 
-          positionArray.push({'freshZoneIndex': x, 'entryPrice': freshZones[x]['entryPrice'], 'targetPrice': freshZones[x]['targetPrice'], 'stopPrice': freshZones[x]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'positionType': '', 'priceReturnedId': idx, 'zoneFormation': freshZones[x]['formation'] } )
+          positionArray.push({'freshZoneIndex': x, 'entryPrice': freshZones[x]['entryPrice'], 'targetPrice': freshZones[x]['targetPrice'], 'stopPrice': freshZones[x]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': freshZones[x]['formation'] } )
 
           freshZones[x]['position'] = true
 
@@ -598,7 +605,7 @@ console.log('About to Check position! positionArray: ', positionArray)
             invalidZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because Leg-Base Candlestick Outside Zone Ceiling - Supply'})
 
               console.log('Invalidated by Leg Bases 2')
-              break
+
             }
 
             // Check if candlestick of the Leg-Base is lower than the floor of the Potential Demand Zone
@@ -608,7 +615,7 @@ console.log('About to Check position! positionArray: ', positionArray)
               invalidZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because Leg-Base Candlestick Outside Zone Floor - Demand'})
 
               console.log('Invalidated by Leg Bases 3')
-              break
+
             }
 
             // Check if candlestick of the Leg-Base is lower than the floor of the Potential Supply Zone
@@ -618,7 +625,7 @@ console.log('About to Check position! positionArray: ', positionArray)
               invalidZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because Leg-Base Candlestick Outside Zone Floor - Supply'})
 
               console.log('Invalidated by Leg Bases 4')
-              break
+
             }
 
             // Are there are more Leg-Bases than Bases?
@@ -628,7 +635,6 @@ console.log('About to Check position! positionArray: ', positionArray)
               invalidZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because There are More Leg-Bases than Bases'})
 
               console.log('Invalidated by Leg Bases 5')
-              break
             }
           }
         }
@@ -637,12 +643,11 @@ console.log('About to Check position! positionArray: ', positionArray)
           console.log('Zone Is Valid - Passed Leg Bases')
         //Set the percentage the leg is inside the Zone depending on where it penetrates
         if (bar[4] < zoneCeiling && bar[3] > zoneFloor) {
-          if (bar[4] < zoneCeiling) {
-            percentageInsideZone = (zoneCeiling - bar[4]) / zoneHeight
-          } else {
-            percentageInsideZone = (bar[3] - zoneFloor) / zoneHeight
-          }
+          percentageInsideZone = (zoneCeiling - bar[4]) / zoneHeight
+        } else {
+          percentageInsideZone = (bar[3] - zoneFloor) / zoneHeight
         }
+
 
         //Check if bar is explosive in a Rally and less than 40% inside the Zone or if the 4 bars form an explosive group
         highestPriceArray = explosiveGroup.map(bar => bar ? bar[3] : null)
@@ -650,10 +655,7 @@ console.log('About to Check position! positionArray: ', positionArray)
         barDistanceFromDemandZone = bar[3] - zoneCeiling
         groupDistanceFromDemandZone =  highestPriceInExplosiveGroup - zoneCeiling
         zoneHeight = zoneCeiling - zoneFloor
-        console.log('IDS: ', i, idx)
-        console.log('Potential Zone: ', potentialZone)
-        console.log('Explosive Group: ', explosiveGroup)
-        console.log('Highest Price in Explosive Group: ', highestPriceInExplosiveGroup)
+
         //Is this Rally EXPLOSIVE?
         if (formation === 'rally' && (
         //Outgoing Leg is Outside Zone
@@ -718,6 +720,17 @@ console.log('About to Check position! positionArray: ', positionArray)
         zoneHeight = zoneCeiling - zoneFloor
 
         //Is this Drop Explosive?
+        console.log('READY TO CHECK IF DROP IS EXPLOSIVE')
+        console.log('lowestPriceInExplosiveGroup: ', lowestPriceInExplosiveGroup)
+        console.log('barDistanceFromSupplyZone: ', barDistanceFromSupplyZone)
+        console.log('groupDistanceFromSupplyZone: ', groupDistanceFromSupplyZone)
+        console.log('zoneHeight: ', zoneHeight)
+        console.log('bar[4]: ', bar[4])
+        console.log('bar[3]: ', bar[3])
+        console.log('zoneCeiling: ', zoneCeiling)
+        console.log('zoneFloor: ', zoneFloor)
+        console.log('percentageInsideZone: ', percentageInsideZone)
+
         if (formation === 'drop' && (
         //Outgoing Leg is Outside Zone
         ( (bar[4] > zoneCeiling || bar[3] < zoneFloor) &&
@@ -739,6 +752,7 @@ console.log('About to Check position! positionArray: ', positionArray)
 
         ) ) ) )
         {
+          console.log('THIS DROP IS EXPLOSIVE.')
           //Check for Attractor Zones
             //Create Array with the zoneFloor of all the Previous Supply Zones
 
@@ -789,7 +803,6 @@ console.log('About to Check position! positionArray: ', positionArray)
         potentialZone = []
         invalidIncomingLeg = false
         zoneInvalidatedByLegBases = false
-        break
       }
       //Go back to initial i loop, checking previous bar if there is one
       potentialZone = []
@@ -835,6 +848,11 @@ console.log('About to Check position! positionArray: ', positionArray)
     export const stopMarker = stopBars.map ( bar =>  {
       return {'x': bar,
       'title': 'S '}
+    })
+
+    export const positionClosedMarker = positionClosedZone.map ( bar =>  {
+      return {'x': bar,
+      'title': 'X '}
     })
 
     export const zoneLineMarkers = zoneLines.map (line => {
@@ -907,6 +925,14 @@ export const options = {
    width: 8,
    fillColor: 'red'
   },
+  {
+type: 'flags',
+data: positionClosedMarker,
+onSeries: 'candlestick',
+shape: 'circlepin',
+width: 8,
+fillColor: 'green'
+},
               {
   	type: 'columnrange',
     name: '',
