@@ -5,13 +5,13 @@ let newArray =  []
 
 while (newEsPrices.length > 1) {
     const bar = newEsPrices.splice(0, 9)
-    bar.map(dataPoint => {
-      if (bar.indexOf(dataPoint) === 0 || bar.indexOf(dataPoint) === 1) {
-        return dataPoint.toString()
-      } else {
-        return dataPoint
-      }
-    })
+    // bar.map(dataPoint => {
+    //   if (bar.indexOf(dataPoint) === 0 || bar.indexOf(dataPoint) === 1) {
+    //     return dataPoint.toString()
+    //   } else {
+    //     return dataPoint
+    //   }
+    // })
 
     newArray.push(bar)
   }
@@ -647,7 +647,7 @@ console.log('The ID is: ', idx)
         }
 
         // Are there are more Leg-Bases than Bases?
-        if( (numberOfLegs/potentialZone.length) < 0.5) {
+        if( (numberOfLegs/potentialZone.length) > 0.5) {
 
           zoneInvalidatedByLegBases = true
 
