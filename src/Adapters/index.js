@@ -651,6 +651,8 @@ console.log('The ID is: ', idx)
           } else if (bar[3] <= zoneCeiling){
           percentageInsideZone = (bar[3] - zoneFloor) / zoneHeight
           }
+        } else {
+          percentageInsideZone = 0
         }
 
 
@@ -725,17 +727,18 @@ console.log('The ID is: ', idx)
         zoneHeight = zoneCeiling - zoneFloor
 
         //Is this Drop Explosive?
-        console.log('READY TO CHECK IF DROP IS EXPLOSIVE')
-        console.log('lowestPriceInExplosiveGroup: ', lowestPriceInExplosiveGroup)
-        console.log('barDistanceFromSupplyZone: ', barDistanceFromSupplyZone)
-        console.log('groupDistanceFromSupplyZone: ', groupDistanceFromSupplyZone)
-        console.log('zoneHeight: ', zoneHeight)
-        console.log('bar[4]: ', bar[4])
-        console.log('bar[3]: ', bar[3])
-        console.log('zoneCeiling: ', zoneCeiling)
-        console.log('zoneFloor: ', zoneFloor)
-        console.log('percentageInsideZone: ', percentageInsideZone)
-
+        if (formation === 'drop') {
+          console.log('READY TO CHECK IF DROP IS EXPLOSIVE')
+          console.log('lowestPriceInExplosiveGroup: ', lowestPriceInExplosiveGroup)
+          console.log('barDistanceFromSupplyZone: ', barDistanceFromSupplyZone)
+          console.log('groupDistanceFromSupplyZone: ', groupDistanceFromSupplyZone)
+          console.log('zoneHeight: ', zoneHeight)
+          console.log('bar[4]: ', bar[4])
+          console.log('bar[3]: ', bar[3])
+          console.log('zoneCeiling: ', zoneCeiling)
+          console.log('zoneFloor: ', zoneFloor)
+          console.log('percentageInsideZone: ', percentageInsideZone)
+        }
         if (formation === 'drop' && (
         //Outgoing Leg is Outside Zone
         ( (bar[4] > zoneCeiling || bar[3] < zoneFloor) &&
