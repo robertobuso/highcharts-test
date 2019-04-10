@@ -1,10 +1,18 @@
-import esPrices from '../Data/esPrices.js';
+import newEsPrices from '../Data/newEsPrices.js';
 import moment from 'moment-timezone';
 
 let newArray =  []
 
-while (esPrices.length > 1) {
-    const bar = esPrices.splice(0, 9)
+while (newEsPrices.length > 1) {
+    const bar = newEsPrices.splice(0, 9)
+    bar.map(dataPoint => {
+      if (bar.indexOf(dataPoint) === 0 || bar.indexOf(dataPoint) === 1) {
+        return dataPoint.toString()
+      } else {
+        return dataPoint
+      }
+    })
+
     newArray.push(bar)
   }
 
@@ -405,6 +413,7 @@ console.log('The ID is: ', idx)
 
     while ( i >= firstPotentialLeg) {
       console.log('Looking for INCOMING LEGS!')
+      console.log('Checking bar with index: ', i)
       if (isItALeg(newArray[i])) {
         console.log('Potential INCOMING Leg: ', i)
         //Is it a rally or a drop?
@@ -480,10 +489,14 @@ console.log('The ID is: ', idx)
         //Is the Incoming Leg valid?
         //Set candlestick depending on Rally or Drop
         if (newArray[i][5] - newArray[i][2] >= 0) {
+          console.log(' Incoming Leg is a Rally')
+          console.log('Candlestick: ', incomingCandlestick)
           incomingCandlestick = newArray[i][5] - newArray[i][2]
           incomingFormation = 'rally'
 
-          //Set size outside Zone when leg is partly in Zone
+          console.log('Candlestick Totally Outside Zone: ', incomingCandlestick)
+
+          //Set size outside Zone when leg is outside Zone
           candlestickSizeOutsideZone = 0
 
           if (newArray[i][2] < zoneFloor) {
@@ -493,7 +506,9 @@ console.log('The ID is: ', idx)
           if (newArray[i][5] > zoneCeiling) {
             candlestickSizeOutsideZone = candlestickSizeOutsideZone + (newArray[i][5] - zoneCeiling)
           }
+          console.log('Candlestick OUTSIDE Zone when part is INSIDE ZONE: ', candlestickSizeOutsideZone)
         } else {
+          console.log(' Incoming Leg is a Drop')
           incomingCandlestick = newArray[i][2] - newArray[i][5]
           incomingFormation = 'drop'
 
@@ -508,7 +523,7 @@ console.log('The ID is: ', idx)
         }
 
         //Is the Incoming Leg at least 25% bigger than zoneHeight and doesn't invade the Zone - Rally
-        if (incomingFormation === 'rally' && ((newArray[i][2] >= zoneCeiling || newArray[i][5] <= zoneFloor)) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
+        if (incomingFormation === 'rally' && ((newArray[i][2] > zoneCeiling || newArray[i][5] < zoneFloor)) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
           invalidIncomingLeg = true
 
             invalidZones.push( {'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because of Incoming Leg is Less than 25% of Potential Zone (Outside Zone)'} )
@@ -516,11 +531,12 @@ console.log('The ID is: ', idx)
           console.log('Line 248: invalid Incoming Leg, outside Zone')
         } else if (incomingFormation === 'rally'
         &&
-        //Incoming Leg is Outside Zone
-        ((newArray[i][2] < zoneFloor && newArray[i][5] > zoneFloor) || (newArray[i][2] < zoneCeiling && newArray[i][2] > zoneCeiling))
+        //Incoming Leg is Inside Zone
+        ((newArray[i][2] <= zoneCeiling && newArray[i][2] >= zoneFloor))
         &&
         //Candlestick outside zone is less than 25% of Zone
         ( (candlestickSizeOutsideZone / zoneHeight) < 0.25 )) {
+
           invalidIncomingLeg = true
 
           invalidZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because of Incoming Leg is Less than 25% of Potential Zone (Inside Zone)'})
@@ -529,7 +545,7 @@ console.log('The ID is: ', idx)
         }
 
         //Is the Incoming Leg at least 25% bigger than zoneHeight and doesn't invade the Zone - Drop
-        if (incomingFormation === 'drop' && ((newArray[i][5] >= zoneCeiling || newArray[i][2] <= zoneFloor)) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
+        if (incomingFormation === 'drop' && ((newArray[i][5] > zoneCeiling || newArray[i][2] < zoneFloor)) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
           invalidIncomingLeg = true
 
           invalidZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because of Incoming Leg is Less than 25% of Potential Zone (Outside Zone)'})
@@ -537,7 +553,7 @@ console.log('The ID is: ', idx)
         } else if (incomingFormation === 'drop'
         &&
         //Incoming Leg is Inside Zone
-        ((newArray[i][5] < zoneCeiling && newArray[i][5] > zoneFloor) || (newArray[i][2] < zoneFloor && newArray[i][2] > zoneCeiling))
+        ((newArray[i][5] <= zoneCeiling && newArray[i][2] >= zoneFloor))
         &&
         //Candlestick outside zone is less than 25% of Zone
         ( (candlestickSizeOutsideZone / zoneHeight) < 0.25 )) {
@@ -627,16 +643,17 @@ console.log('The ID is: ', idx)
               console.log('Invalidated by Leg Bases 4')
 
             }
-
-            // Are there are more Leg-Bases than Bases?
-            if( (numberOfLegs/potentialZone.length) > 0.5) {
-              zoneInvalidatedByLegBases = true
-
-              invalidZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because There are More Leg-Bases than Bases'})
-
-              console.log('Invalidated by Leg Bases 5')
-            }
           }
+        }
+
+        // Are there are more Leg-Bases than Bases?
+        if( (numberOfLegs/potentialZone.length) < 0.5) {
+
+          zoneInvalidatedByLegBases = true
+
+          invalidZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because There are More Leg-Bases than Bases'})
+
+          console.log('Invalidated by Leg Bases 5')
         }
 
         if (zoneInvalidatedByLegBases === false) {
@@ -798,8 +815,8 @@ console.log('The ID is: ', idx)
       }
     }
     // Finished setting Potential Zone, leave loop to return data for chart below
-      i = i - 1
-      console.log('Line 805')
+      console.log('The bar were looking at as possible Incoming Leg before deducting 1: ', i)
+      console.log('Line 810')
   }
       //This is when invalidIncomingLeg === true
 
@@ -813,17 +830,25 @@ console.log('The ID is: ', idx)
         zoneInvalidatedByLegBases = false
       }
       //Go back to initial i loop, checking previous bar if there is one
+      console.log('Are we touching this one?')
       potentialZone = []
       invalidIncomingLeg = false
       zoneInvalidatedByLegBases = false
       candlestickSizeOutsideZone = 0
       i = i - 1
+      if (i < firstPotentialLeg ) {
+        console.log('We looked through all the possible Incoming Legs (6 bars).')
+      } else {
+      console.log('Now well see if this bar is an Incoming Leg: ', i)
+    }
     } else {
+      console.log('BAR IS NOT A LEG')
       potentialZone = []
       invalidIncomingLeg = false
       zoneInvalidatedByLegBases = false
       candlestickSizeOutsideZone = 0
       i = i - 1
+      console.log('Lets check if this one is a leg: ', i)
     }
   }
   } else {
@@ -960,7 +985,7 @@ fillColor: 'green'
   }
       ],
       yAxis: {
-          min: 2595,
+          min: 2700,
           tickInterval: 10,
           title: {
               text: 'Price'
@@ -1034,7 +1059,7 @@ fillColor: 'green'
         }
             ],
             yAxis: {
-                min: 2595,
+                min: 2700,
                 tickInterval: 10,
                 title: {
                     text: 'Price'
