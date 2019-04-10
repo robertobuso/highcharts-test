@@ -641,11 +641,16 @@ console.log('The ID is: ', idx)
 
         if (zoneInvalidatedByLegBases === false) {
           console.log('Zone Is Valid - Passed Leg Bases')
+
         //Set the percentage the leg is inside the Zone depending on where it penetrates
+
         if (bar[4] < zoneCeiling && bar[3] > zoneFloor) {
-          percentageInsideZone = (zoneCeiling - bar[4]) / zoneHeight
-        } else {
+          //Bar is Inside Zone
+          if(bar[3] > zoneCeiling) {
+            percentageInsideZone = (zoneCeiling - bar[4]) / zoneHeight
+          } else if (bar[3] <= zoneCeiling){
           percentageInsideZone = (bar[3] - zoneFloor) / zoneHeight
+          }
         }
 
 
