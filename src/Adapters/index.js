@@ -64,6 +64,11 @@ let stopBars = []
 let positionClosedZone = []
 let zoneLines = []
 let potentialFreshZones = []
+let notFreshZones = []
+let invalidIncomingLegZones = []
+let invalidLegBaseZones = []
+let invalidAttractorZones = []
+let unusedZones = []
 
 //Set initial ceiling and floor based on direction of first bar
   if (newArray[0][5] - newArray[0][2] >= 0) {
@@ -174,7 +179,7 @@ console.log('zone: ', zone)
       zone['isItFreshBars'] = zone['isItFreshBars'] + 1
 
       //Check if Price Returned to Zone
-      if (bar[3] >= zoneFloor && bar[4] <= zoneCeiling) {
+      if (bar[3] >= zone['zoneFloor'] && bar[4] <= zone['zoneCeiling']) {
 
         zone['priceReturnedToZone'] = zone['priceReturnedToZone'] + 1
 
@@ -188,20 +193,20 @@ console.log('zone: ', zone)
 
           zone['type'] = 'Not Fresh - Price Returned to Zone More than Once'
 
-          invalidZones.push(zone)
+          notFreshZones.push(zone)
 
           potentialFreshZones.splice(potentialFreshZones.indexOf(zone), 1)
 
-          console.log('ZONE IS NOT FRESH. The Price Returned to Zone More than Once - Rally')
+          console.log('ZONE IS NOT FRESH. The Price Returned to Zone More than Once - Rally ', invalidZones[invalidZones.length -1])
         } else if ( bar[4] <= zone['zoneCeiling'] && ((zone['zoneCeiling'] - bar[4])/zone['zoneHeight'] > 0.25)) {
 
-          zone['type'] = 'Not Fresh - Price Went in More than 25% -- Highest Price Above Zone Floor'
+          zone['type'] = 'Not Fresh - The Price Went in More than 25% -- Rally'
 
-          invalidZones.push(zone)
+          notFreshZones.push(zone)
 
           potentialFreshZones.splice(potentialFreshZones.indexOf(zone), 1)
 
-          console.log('ZONE IS NOT FRESH. The Price Went in More than 25% -- Rally')
+          console.log('ZONE IS NOT FRESH. The Price Went in More than 25% -- Rally ', invalidZones[invalidZones.length -1])
         }
       }
 
@@ -234,7 +239,7 @@ console.log('zone: ', zone)
       zone['isItFreshBars'] = zone['isItFreshBars'] + 1
 
       //Check if Price Returned to Zone
-      if (bar[3] >= zoneFloor && bar[4] <= zoneCeiling) {
+      if (bar[3] >= zone['zoneFloor'] && bar[4] <= zone['zoneCeiling']) {
         zone['priceReturnedToZone'] = zone['priceReturnedToZone'] + 1
 
         console.log('The Price Returned on bar number: ', zone['isItFreshBars'])
@@ -246,20 +251,20 @@ console.log('zone: ', zone)
 
           zone['type'] = 'Not Fresh - Price Returned to Zone More than Once'
 
-          invalidZones.push(zone)
+          notFreshZones.push(zone)
 
           potentialFreshZones.splice(potentialFreshZones.indexOf(zone), 1)
 
-          console.log('ZONE IS NOT FRESH. The Price Returned to Zone More than Once - Drop')
+          console.log('ZONE IS NOT FRESH. The Price Returned to Zone More than Once - Drop ', invalidZones[invalidZones.length -1])
         } else if (bar[3] >= zone['zoneFloor'] && ((bar[3] - zone['zoneFloor'])/zone['zoneHeight'] > 0.25)) {
 
-          zone['type'] = 'Not Fresh - Price Went in More than 25% -- Highest Price Above Zone Floor'
+          zone['type'] = 'Not Fresh - The Price Went in More than 25% -- Drop'
 
-          invalidZones.push(zone)
+          notFreshZones.push(zone)
 
           potentialFreshZones.splice(potentialFreshZones.indexOf(zone), 1)
 
-          console.log('ZONE IS NOT FRESH. The Price Went in More than 25% -- Drop')
+          console.log('ZONE IS NOT FRESH. The Price Went in More than 25% -- Drop ', invalidZones[invalidZones.length -1])
         }
       }
 
@@ -526,7 +531,7 @@ console.log('The ID is: ', idx)
         if (incomingFormation === 'rally' && ((newArray[i][2] > zoneCeiling || newArray[i][5] < zoneFloor)) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
           invalidIncomingLeg = true
 
-            invalidZones.push( {'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because of Incoming Leg is Less than 25% of Potential Zone (Outside Zone)'} )
+            invalidIncomingLegZones.push( {'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because of Incoming Leg is Less than 25% of Potential Zone (Outside Zone)'} )
 
           console.log('Line 248: invalid Incoming Leg, outside Zone')
         } else if (incomingFormation === 'rally'
@@ -539,7 +544,7 @@ console.log('The ID is: ', idx)
 
           invalidIncomingLeg = true
 
-          invalidZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because of Incoming Leg is Less than 25% of Potential Zone (Inside Zone)'})
+          invalidIncomingLegZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because of Incoming Leg is Less than 25% of Potential Zone (Inside Zone)'})
 
           console.log('Line 257: invalid Incoming Leg, inside Zone')
         }
@@ -548,7 +553,7 @@ console.log('The ID is: ', idx)
         if (incomingFormation === 'drop' && ((newArray[i][5] > zoneCeiling || newArray[i][2] < zoneFloor)) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
           invalidIncomingLeg = true
 
-          invalidZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because of Incoming Leg is Less than 25% of Potential Zone (Outside Zone)'})
+          invalidIncomingLegZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because of Incoming Leg is Less than 25% of Potential Zone (Outside Zone)'})
 
         } else if (incomingFormation === 'drop'
         &&
@@ -559,7 +564,7 @@ console.log('The ID is: ', idx)
         ( (candlestickSizeOutsideZone / zoneHeight) < 0.25 )) {
           invalidIncomingLeg = true
 
-          invalidZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because of Incoming Leg is Less than 25% of Potential Zone (Outside Zone)'})
+          invalidIncomingLegZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because of Incoming Leg is Less than 25% of Potential Zone (Inside Zone)'})
 
           console.log('Line 276: invalid Incoming Leg, inside Zone')
         }
@@ -609,7 +614,7 @@ console.log('The ID is: ', idx)
             if (formation === 'rally' && potentialZone[index][5] > zoneCeiling) {
               zoneInvalidatedByLegBases = true
 
-              invalidZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because Leg-Base Candlestick Outside Zone Ceiling - Demand'})
+              invalidLegBaseZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because Leg-Base Candlestick Outside Zone Ceiling - Demand'})
 
               console.log('Invalidated by Leg Bases 1')
             }
@@ -618,7 +623,7 @@ console.log('The ID is: ', idx)
             if (formation === 'drop' && potentialZone[index][2] > zoneCeiling) {
               zoneInvalidatedByLegBases = true
 
-            invalidZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because Leg-Base Candlestick Outside Zone Ceiling - Supply'})
+            invalidLegBaseZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because Leg-Base Candlestick Outside Zone Ceiling - Supply'})
 
               console.log('Invalidated by Leg Bases 2')
 
@@ -628,7 +633,7 @@ console.log('The ID is: ', idx)
             if (formation === 'rally' && potentialZone[index][2] < zoneFloor) {
               zoneInvalidatedByLegBases = true
 
-              invalidZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because Leg-Base Candlestick Outside Zone Floor - Demand'})
+              invalidLegBaseZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because Leg-Base Candlestick Outside Zone Floor - Demand'})
 
               console.log('Invalidated by Leg Bases 3')
 
@@ -638,7 +643,7 @@ console.log('The ID is: ', idx)
             if (formation === 'drop' && potentialZone[index][5] < zoneFloor) {
               zoneInvalidatedByLegBases = true
 
-              invalidZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because Leg-Base Candlestick Outside Zone Floor - Supply'})
+              invalidLegBaseZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because Leg-Base Candlestick Outside Zone Floor - Supply'})
 
               console.log('Invalidated by Leg Bases 4')
 
@@ -651,7 +656,7 @@ console.log('The ID is: ', idx)
 
           zoneInvalidatedByLegBases = true
 
-          invalidZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because There are More Leg-Bases than Bases'})
+          invalidLegBaseZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because There are More Leg-Bases than Bases'})
 
           console.log('Invalidated by Leg Bases 5')
         }
@@ -710,7 +715,7 @@ console.log('The ID is: ', idx)
               if (newArrayOfZones[x] < zoneFloor && ( (zoneFloor - newArrayOfZones[x]) <= (zoneHeight * 2) ) ) {
                 demandAttractorZoneFound = true
 
-                invalidZones.push( {'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid - Attractor Zone Found - Demand'} )
+                invalidAttractorZones.push( {'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid - Attractor Zone Found - Demand'} )
 
                 console.log('Attractor Zone! Line 687')
                 break
@@ -787,7 +792,7 @@ console.log('The ID is: ', idx)
               if (newArrayOfSupplyZones[x] > zoneCeiling && ( (newArrayOfSupplyZones[x] - zoneCeiling) <= (zoneHeight * 2) ) ) {
                 supplyAttractorZoneFound = true
 
-                invalidZones.push( {'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid - Attractor Zone Found - Supply'} )
+                invalidAttractorZones.push( {'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid - Attractor Zone Found - Supply'} )
 
                 console.log('Attractor Zone! Line 726')
                 break
@@ -823,7 +828,7 @@ console.log('The ID is: ', idx)
     }  else if (potentialZone.length > 6) {
       //There were more than 6 bases in between Incoming Leg and Outgoing Leg -- UNUSED
 
-        invalidZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Unused - More than 6 Bars Between Legs'} )
+        unusedZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Unused - More than 6 Bars Between Legs'} )
 
         potentialZone = []
         invalidIncomingLeg = false
@@ -896,7 +901,17 @@ console.log('The ID is: ', idx)
       }
     })
 
-export const options = {
+    export const notFresh = notFreshZones
+
+    export const badIncomingLeg = invalidIncomingLegZones
+
+    export const badLegBases = invalidLegBaseZones
+
+    export const foundAttractor = invalidAttractorZones
+
+    export const unused = unusedZones
+
+    export const options = {
       chart: {
         zoomType: 'xy',
 

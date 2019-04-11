@@ -16,9 +16,10 @@ class App extends Component {
     }
 
     handleChartClick = () => {
-      this.setState( {
-        newWindow: true
-      })
+      // this.setState( {
+      //   newWindow: true
+      // })
+      console.log('Disabled to test click on zones and modals.')
     }
 
     render() {
