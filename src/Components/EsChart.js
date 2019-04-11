@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Highcharts from 'highcharts/highstock';
 
-import {options, finalPotentialZones, finalInvalidZones, finalPositions, notFresh, badIncomingLeg, badLegBases, foundAttractor, unused} from '../Adapters'
+import {options, finalPotentialZones, finalPositions, notFresh, badIncomingLeg, badLegBases, foundAttractor, unused} from '../Adapters'
 
 import HighchartsReact from '../HighchartsReact.js'
 

@@ -1,10 +1,19 @@
 import React, { Component } from 'react';
 import { Grid } from 'semantic-ui-react'
+import { incomingLegInput} from '../Adapters'
 
 class ParametersForm extends Component {
 
+  state = {
+    incomingLeg: 25
+  }
+
   handleSubmit = (event) => {
     event.preventDefault()
+  }
+
+  handleIncomingLegChange = (event) => {
+    this.setState( { incomingLeg: event.target.value}, () => incomingLegInput(this.state.incomingLeg) )
   }
 
     render() {
@@ -56,9 +65,9 @@ Incoming Leg:
 name='base'
 type='text'
 className='number-input'
-placeholder='75'
+placeholder='25'
 floated='left'
-// onChange={this.handleInputChange}
+onChange={this.handleIncomingLegChange}
 />
 {' % bigger than the longest Base in the Potential Zone'}
 </Grid.Column>

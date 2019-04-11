@@ -1,7 +1,10 @@
+import React, { useState } from 'react';
 import newEsPrices from '../Data/newEsPrices.js';
 import moment from 'moment-timezone';
 
 let newArray =  []
+let globalIncomingLegPercentage = 0.25
+
 
 while (newEsPrices.length > 1) {
     const bar = newEsPrices.splice(0, 9)
@@ -79,7 +82,7 @@ let unusedZones = []
     zoneFloor = newArray[0][5]
   }
 
-const isItALeg = (bar) => {
+ const isItALeg = (bar) => {
   let candlestick
 
   if (bar[5] - bar[2] > 0) {
@@ -528,7 +531,7 @@ console.log('The ID is: ', idx)
         }
 
         //Is the Incoming Leg at least 25% bigger than zoneHeight and doesn't invade the Zone - Rally
-        if (incomingFormation === 'rally' && ((newArray[i][2] > zoneCeiling || newArray[i][5] < zoneFloor)) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
+        if (incomingFormation === 'rally' && ((newArray[i][2] > zoneCeiling || newArray[i][5] < zoneFloor)) && ((incomingCandlestick / zoneHeight) < globalIncomingLegPercentage )) {
           invalidIncomingLeg = true
 
             invalidIncomingLegZones.push( {'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because of Incoming Leg is Less than 25% of Potential Zone (Outside Zone)'} )
@@ -540,7 +543,7 @@ console.log('The ID is: ', idx)
         ((newArray[i][2] <= zoneCeiling && newArray[i][2] >= zoneFloor))
         &&
         //Candlestick outside zone is less than 25% of Zone
-        ( (candlestickSizeOutsideZone / zoneHeight) < 0.25 )) {
+        ( (candlestickSizeOutsideZone / zoneHeight) < globalIncomingLegPercentage )) {
 
           invalidIncomingLeg = true
 
@@ -550,7 +553,7 @@ console.log('The ID is: ', idx)
         }
 
         //Is the Incoming Leg at least 25% bigger than zoneHeight and doesn't invade the Zone - Drop
-        if (incomingFormation === 'drop' && ((newArray[i][5] > zoneCeiling || newArray[i][2] < zoneFloor)) && ((incomingCandlestick / zoneHeight) < 0.25 )) {
+        if (incomingFormation === 'drop' && ((newArray[i][5] > zoneCeiling || newArray[i][2] < zoneFloor)) && ((incomingCandlestick / zoneHeight) < globalIncomingLegPercentage )) {
           invalidIncomingLeg = true
 
           invalidIncomingLegZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because of Incoming Leg is Less than 25% of Potential Zone (Outside Zone)'})
@@ -561,7 +564,7 @@ console.log('The ID is: ', idx)
         ((newArray[i][5] <= zoneCeiling && newArray[i][2] >= zoneFloor))
         &&
         //Candlestick outside zone is less than 25% of Zone
-        ( (candlestickSizeOutsideZone / zoneHeight) < 0.25 )) {
+        ( (candlestickSizeOutsideZone / zoneHeight) < globalIncomingLegPercentage )) {
           invalidIncomingLeg = true
 
           invalidIncomingLegZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because of Incoming Leg is Less than 25% of Potential Zone (Inside Zone)'})
@@ -737,6 +740,9 @@ console.log('The ID is: ', idx)
           }
         } else {
           if (formation !== 'drop') {
+            if (percentageInsideZone > 0.4) {
+              console.log('Outgoing Leg is more than 40% inside zone.')
+            }
             console.log('This Rally is NOT explosive.')
           }
         }
@@ -815,6 +821,10 @@ console.log('The ID is: ', idx)
         }
       } else {
         if (formation !== 'rally') {
+          if (percentageInsideZone > 0.4) {
+            console.log('Outgoing Leg is more than 40% inside zone.')
+          }
+          
           console.log('This Drop is NOT explosive.')
         }
       }
@@ -867,6 +877,7 @@ console.log('The ID is: ', idx)
     "close": bar[5]}
   })
 
+
   export const finalPotentialZones = freshZones
 
   export const finalInvalidZones = invalidZones
@@ -910,6 +921,13 @@ console.log('The ID is: ', idx)
     export const foundAttractor = invalidAttractorZones
 
     export const unused = unusedZones
+
+    export const incomingLegInput = (input) => {
+
+      globalIncomingLegPercentage = input / 100
+      console.log(globalIncomingLegPercentage)
+      return globalIncomingLegPercentage
+    }
 
     export const options = {
       chart: {
