@@ -3,6 +3,8 @@ import newEsPrices from '../Data/newEsPrices.js';
 import moment from 'moment-timezone';
 
 let newArray =  []
+
+//Variables for Parameters Form
 let globalIncomingLegPercentage = 0.25
 
 
@@ -824,7 +826,7 @@ console.log('The ID is: ', idx)
           if (percentageInsideZone > 0.4) {
             console.log('Outgoing Leg is more than 40% inside zone.')
           }
-          
+
           console.log('This Drop is NOT explosive.')
         }
       }
