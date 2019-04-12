@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
-import esPrices from '../Data/esPrices.js';
+import newEsPrices from '../Data/newEsPrices.js';
 import moment from 'moment-timezone';
 
 let newArray =  []
 
 //Variables for Parameters Form
 let globalIncomingLegPercentage = 0.0
-let outgoingLegPercentage = 0.8
+let outgoingLegPercentage = 0.4
+let explosiveBarMultiplier = 1
+let explosiveGroupMultiplier = 2
+let veryExplosiveGroupMultiplier = 4
 
-
-while (esPrices.length > 1) {
-    const bar = esPrices.splice(0, 9)
+while (newEsPrices.length > 1) {
+    const bar = newEsPrices.splice(0, 9)
     // bar.map(dataPoint => {
     //   if (bar.indexOf(dataPoint) === 0 || bar.indexOf(dataPoint) === 1) {
     //     return dataPoint.toString()
@@ -68,6 +70,7 @@ let averageTrueRange = 0
 let positionArray = []
 let priceReturnedBars = []
 let stopBars = []
+let breakEvenBars = []
 let positionClosedZone = []
 let zoneLines = []
 let potentialFreshZones = []
@@ -151,7 +154,7 @@ export const finalData = newArray.map( bar => {
 
   //Is the third bar explosive in a Rally and the first bar is a Leg?
   barDistanceFromDemandZone = newArray[2][3] - zoneCeiling
-  if (formation === 'rally' && barDistanceFromDemandZone >= zoneCeiling-zoneFloor) {
+  if (formation === 'rally' && barDistanceFromDemandZone >= ((zoneCeiling-zoneFloor) * explosiveBarMultiplier)) {
     potentialZone.push(newArray[1])
     distinctPotentialZone = [...new Set(potentialZone)]
 
@@ -162,7 +165,7 @@ export const finalData = newArray.map( bar => {
 
   //Is the third bar explosive in a Drop and the first bar is a Leg?
   barDistanceFromSupplyZone = zoneFloor - newArray[2][4]
-  if (formation === 'drop' && barDistanceFromSupplyZone >= zoneCeiling-zoneFloor) {
+  if (formation === 'drop' && barDistanceFromSupplyZone >= ((zoneCeiling-zoneFloor) * explosiveBarMultiplier)) {
     potentialZone.push(newArray[1])
 
     freshZones.push([ {'bases': distinctPotentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'fresh'}, {'incomingLeg': 0}, {'outgoingLeg': 3} ])
@@ -330,14 +333,14 @@ console.log('The ID is: ', idx)
         if (positionArray[z]['result'] === 'break even') {
           positionArray[z]['type'] = 'break even'
           resultsData['break even'] = resultsData['break even'] + 1
+          breakEvenBars.push(dateTime)
+          console.log('PRICE HIT THE BREAK EVEN ON RALLY!')
         } else {
           positionArray[z]['type'] = 'stop'
           resultsData['stop'] = resultsData['stop'] + 1
+          stopBars.push(dateTime)
+          console.log('PRICE HIT THE STOP ON RALLY!')
         }
-
-        stopBars.push(dateTime)
-
-        console.log('PRICE HIT THE STOP ON RALLY!')
       }
 
       //Check if an Open Position Should Be Closed Successfully - Rally
@@ -361,14 +364,14 @@ console.log('The ID is: ', idx)
         if (positionArray[z]['result'] === 'break even') {
           positionArray[z]['type'] = 'break even'
           resultsData['break even'] = resultsData['break even'] + 1
+          breakEvenBars.push(dateTime)
+          console.log('PRICE HIT THE BREAK EVEN ON DROP!')
         } else {
           positionArray[z]['type'] = 'stop'
           resultsData['stop'] = resultsData['stop'] + 1
+          stopBars.push(dateTime)
+          console.log('PRICE HIT THE STOP ON DROP!')
         }
-
-        stopBars.push(dateTime)
-
-        console.log('PRICE HIT THE STOP ON DROP!')
       }
 
       //Check if an Open Position Should Be Closed Successfully - Drop
@@ -423,6 +426,7 @@ console.log('The ID is: ', idx)
 
       //Check if Price returns in a Rally
       if(freshZones[x]['formation'] === 'rally' && bar[4] <= freshZones[x]['entryPrice'] && freshZones[x]['position']=== false) {
+
           positionArray.push({'freshZoneIndex': x, 'entryPrice': freshZones[x]['entryPrice'], 'targetPrice': freshZones[x]['targetPrice'], 'stopPrice': freshZones[x]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': freshZones[x]['formation'], 'result': 'unfilled' } )
 
           resultsData['unfilled'] = resultsData['unfilled'] + 1
@@ -579,6 +583,7 @@ console.log('The ID is: ', idx)
         }
 
         //Is the Incoming Leg at least 25% bigger than zoneHeight and doesn't invade the Zone - Rally
+        console.log('Incoming Leg Percentage at 582 is: ', globalIncomingLegPercentage)
         if (incomingFormation === 'rally' && ((newArray[i][2] > zoneCeiling || newArray[i][5] < zoneFloor)) && ((incomingCandlestick / zoneHeight) < globalIncomingLegPercentage )) {
           invalidIncomingLeg = true
 
@@ -633,7 +638,7 @@ console.log('The ID is: ', idx)
         highestPriceInExplosiveGroup = Math.max(...highestPriceArray)
         groupDistanceFromDemandZone =  highestPriceInExplosiveGroup - zoneCeiling
 
-         if (formation === 'rally' && groupDistanceFromDemandZone >= (zoneHeight * 4)) {
+         if (formation === 'rally' && groupDistanceFromDemandZone >= (zoneHeight * veryExplosiveGroupMultiplier)) {
            console.log('VERY EXPLOSIVE GROUP IN A RALLY!')
            invalidIncomingLeg = false
          }
@@ -643,7 +648,7 @@ console.log('The ID is: ', idx)
          lowestPriceInExplosiveGroup = Math.min(...lowestPriceArray)
          groupDistanceFromSupplyZone =  zoneFloor - lowestPriceInExplosiveGroup
 
-         if (formation === 'drop' && groupDistanceFromSupplyZone >= (zoneHeight * 4)) {
+         if (formation === 'drop' && groupDistanceFromSupplyZone >= (zoneHeight * veryExplosiveGroupMultiplier)) {
            console.log('VERY EXPLOSIVE GROUP IN A DROP!')
            invalidIncomingLeg = false
          }
@@ -742,7 +747,7 @@ console.log('The ID is: ', idx)
         ( (bar[4] > zoneCeiling || bar[3] < zoneFloor) &&
         //Distance between Highest Price of the Explosive Bar or Group is equal to or more than 1X or 2X the zoneHeight
         (
-          barDistanceFromDemandZone >= zoneHeight || groupDistanceFromDemandZone >= (zoneHeight * 2)
+          barDistanceFromDemandZone >= zoneHeight * explosiveBarMultiplier || groupDistanceFromDemandZone >= (zoneHeight * explosiveGroupMultiplier)
         )
         )
        ||
@@ -754,7 +759,7 @@ console.log('The ID is: ', idx)
         (percentageInsideZone <= outgoingLegPercentage &&
 
         //The distance between Highest Price of the Explosive Bar or Group is equal to or more than 1X or 2X the zoneHeight
-        (barDistanceFromDemandZone >= zoneHeight || groupDistanceFromDemandZone >= (zoneHeight * 2))
+        (barDistanceFromDemandZone >= zoneHeight * explosiveBarMultiplier || groupDistanceFromDemandZone >= (zoneHeight * explosiveGroupMultiplier))
         ) ) ) )
         {
           //Check for Attractor Zones
@@ -820,7 +825,7 @@ console.log('The ID is: ', idx)
         ( (bar[4] > zoneCeiling || bar[3] < zoneFloor) &&
         //Distance between Lowest Price of the Explosive Bar or Group is equal to or more than 1X or 2X the zoneHeight
         (
-          barDistanceFromSupplyZone >= zoneHeight || groupDistanceFromSupplyZone >= (zoneHeight * 2)
+          barDistanceFromSupplyZone >= zoneHeight * explosiveBarMultiplier || groupDistanceFromSupplyZone >= (zoneHeight * explosiveGroupMultiplier)
         )
         )
        ||
@@ -832,7 +837,7 @@ console.log('The ID is: ', idx)
         (percentageInsideZone <= outgoingLegPercentage &&
 
         //The distance between Lowest Price of the Explosive Bar or Group is equal to or more than 1X or 2X the zoneHeight
-        (barDistanceFromSupplyZone >= zoneHeight || groupDistanceFromSupplyZone >= (zoneHeight * 2))
+        (barDistanceFromSupplyZone >= zoneHeight * explosiveBarMultiplier || groupDistanceFromSupplyZone >= (zoneHeight * explosiveGroupMultiplier))
 
         ) ) ) )
         {
@@ -947,6 +952,11 @@ console.log('The ID is: ', idx)
       'title': 'S '}
     })
 
+    export const breakEvenMarker = breakEvenBars.map ( bar =>  {
+      return {'x': bar,
+      'title': 'BE '}
+    })
+
     export const positionClosedMarker = positionClosedZone.map ( bar =>  {
       return {'x': bar,
       'title': 'X '}
@@ -970,12 +980,12 @@ console.log('The ID is: ', idx)
 
     export const unused = unusedZones
 
-    export const incomingLegInput = (input) => {
-
-      globalIncomingLegPercentage = input / 100
-      console.log(globalIncomingLegPercentage)
-      return globalIncomingLegPercentage
+    function testingFormResponse(input) {
+      console.log('The input is: ', input/100)
+      return input / 100
     }
+
+    export const finalIncomingLegPercentage = (input) => { testingFormResponse(input) }
 
     export const options = {
       chart: {
@@ -1046,6 +1056,14 @@ onSeries: 'candlestick',
 shape: 'circlepin',
 width: 8,
 fillColor: 'green'
+},
+{
+type: 'flags',
+data: breakEvenMarker,
+onSeries: 'candlestick',
+shape: 'circlepin',
+width: 8,
+fillColor: 'white'
 },
               {
   	type: 'columnrange',

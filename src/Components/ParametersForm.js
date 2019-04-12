@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Grid } from 'semantic-ui-react'
-import { incomingLegInput} from '../Adapters'
+import { finalIncomingLegPercentage } from '../Adapters'
 
 class ParametersForm extends Component {
 
@@ -13,7 +13,8 @@ class ParametersForm extends Component {
   }
 
   handleIncomingLegChange = (event) => {
-    this.setState( { incomingLeg: event.target.value}, () => incomingLegInput(this.state.incomingLeg) )
+    this.setState( { incomingLeg: event.target.value}, () => finalIncomingLegPercentage(parseFloat(this.state.incomingLeg)) )
+    // this.props.reRenderChart(this.state.incomingLeg)
   }
 
     render() {

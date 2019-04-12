@@ -12,7 +12,8 @@ import ResultsTable from './Components/ResultsTable.js'
 class App extends Component {
 
     state = {
-      newWindow: false
+      newWindow: false,
+      renderChart: false
     }
 
     handleChartClick = () => {
@@ -20,6 +21,11 @@ class App extends Component {
       //   newWindow: true
       // })
       console.log('Disabled to test click on zones and modals.')
+    }
+
+    reRenderChart = (data) => {
+      console.log('Re-rendering chart')
+      this.setState( { renderChart: !this.state.renderChart})
     }
 
     render() {
@@ -53,7 +59,8 @@ class App extends Component {
             <Grid columns={2}>
             <Grid.Column width={14} >
               <EsChart
-                handleChartClick={this.handleChartClick}/>
+                handleChartClick={this.handleChartClick}
+                reRenderChart={this.reRenderChart}/>
             </Grid.Column>
 
             <Grid.Column  width={2}>
@@ -69,7 +76,8 @@ class App extends Component {
 
           <Grid.Row>
             <Grid.Column className='input-scroll' style={{height: '240px'}}>
-              <ParametersForm />
+              <ParametersForm
+                reRenderChart={this.reRenderChart}/>
             </Grid.Column>
           </Grid.Row>
         </Grid>
