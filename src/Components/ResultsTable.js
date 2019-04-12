@@ -1,5 +1,9 @@
 import React, { Component } from 'react';
-import {resultsData} from '../Adapters'
+import {finalResultsData} from '../Adapters'
+
+const netResult = finalResultsData['t3'] - finalResultsData['stop']
+
+const totalResult = finalResultsData['t3'] + finalResultsData['stop'] + finalResultsData['break even'] + finalResultsData['unfilled']
 
 class ResultsTable extends Component {
     render() {
@@ -11,7 +15,7 @@ class ResultsTable extends Component {
           <tr>
             <th style={ {fontSize:'24px', color:'green'} }>NET</th>
             <th></th>
-            <th style={ {fontSize:'24px', color:'green'} }>1</th>
+            <th style={ {fontSize:'24px', color:'green'} }>{netResult}</th>
           </tr>
           </thead>
           <tbody>
@@ -23,22 +27,22 @@ class ResultsTable extends Component {
             <tr style={{textAlign:'center'}}>
               <td>T3</td>
               <td></td>
-              <td>4</td>
+              <td>{finalResultsData['t3']}</td>
             </tr>
             <tr style={{textAlign:'center'}}>
               <td>Break Even</td>
               <td></td>
-              <td>1</td>
+              <td>{finalResultsData['break even']}</td>
             </tr>
             <tr style={{textAlign:'center'}}>
               <td>Stop</td>
               <td></td>
-              <td>2</td>
+              <td>{finalResultsData['stop']}</td>
             </tr>
             <tr style={{textAlign:'center'}}>
               <td>Unfilled</td>
               <td></td>
-              <td>1</td>
+              <td>{finalResultsData['unfilled']}</td>
             </tr>
             <tr>
               <td>
@@ -48,7 +52,7 @@ class ResultsTable extends Component {
             <tr style={{textAlign:'center'}}>
               <td>Total</td>
               <td></td>
-              <td>8</td>
+              <td>{totalResult}</td>
             </tr>
             </tbody>
           </table>

@@ -76,6 +76,7 @@ let invalidIncomingLegZones = []
 let invalidLegBaseZones = []
 let invalidAttractorZones = []
 let unusedZones = []
+let resultsData = {'t3': 0, 'break even': 0, 'stop': 0, 'unfilled': 0}
 
 //Set initial ceiling and floor based on direction of first bar
   if (newArray[0][5] - newArray[0][2] >= 0) {
@@ -324,15 +325,27 @@ console.log('The ID is: ', idx)
       if (positionArray[z]['zoneFormation'] === 'rally' && positionArray[z]['positionStatus'] === 'open' && bar[4] <= positionArray[z]['stopPrice']) {
 
         positionArray[z]['positionStatus'] = 'closed'
-        positionArray[z]['type'] = 'hit stop'
+        resultsData['unfilled'] = resultsData['unfilled'] - 1
+
+        if (positionArray[z]['result'] === 'break even') {
+          positionArray[z]['type'] = 'break even'
+          resultsData['break even'] = resultsData['break even'] + 1
+        } else {
+          positionArray[z]['type'] = 'stop'
+          resultsData['stop'] = resultsData['stop'] + 1
+        }
+
         stopBars.push(dateTime)
+
         console.log('PRICE HIT THE STOP ON RALLY!')
       }
 
       //Check if an Open Position Should Be Closed Successfully - Rally
       else if (positionArray[z]['zoneFormation'] === 'rally' && positionArray[z]['positionStatus'] === 'open' && bar[3] >= positionArray[z]['targetPrice']) {
         positionArray[z]['positionStatus'] = 'closed'
-        positionArray[z]['type'] = 'success'
+        resultsData['unfilled'] = resultsData['unfilled'] - 1
+        positionArray[z]['type'] = 't3'
+        resultsData['t3'] = resultsData['t3'] + 1
         priceReturnedBars.push(dateTime)
         console.log('SUCCESS!!! The price reached the Target Price (T3) - Rally')
         console.log('ID: ', idx)
@@ -343,16 +356,30 @@ console.log('The ID is: ', idx)
       if (positionArray[z]['zoneFormation'] === 'drop' && positionArray[z]['positionStatus'] === 'open' && bar[3] >= positionArray[z]['stopPrice']) {
 
         positionArray[z]['positionStatus'] = 'closed'
-        positionArray[z]['type'] = 'hit stop'
+        resultsData['unfilled'] = resultsData['unfilled'] - 1
+
+        if (positionArray[z]['result'] === 'break even') {
+          positionArray[z]['type'] = 'break even'
+          resultsData['break even'] = resultsData['break even'] + 1
+        } else {
+          positionArray[z]['type'] = 'stop'
+          resultsData['stop'] = resultsData['stop'] + 1
+        }
+
         stopBars.push(dateTime)
+
         console.log('PRICE HIT THE STOP ON DROP!')
       }
 
       //Check if an Open Position Should Be Closed Successfully - Drop
       else if (positionArray[z]['zoneFormation'] === 'drop' && positionArray[z]['positionStatus'] === 'open' && bar[4] <= positionArray[z]['targetPrice']) {
         positionArray[z]['positionStatus'] = 'closed'
-        positionArray[z]['type'] = 'success'
+        resultsData['unfilled'] = resultsData['unfilled'] - 1
+        positionArray[z]['type'] = 't3'
+
         priceReturnedBars.push(dateTime)
+        resultsData['t3'] = resultsData['t3'] + 1
+
         console.log('SUCCESS!!! The price reached the Target Price (T3) - Drop')
         console.log('ID: ', idx)
         console.log('Bar: ', bar)
@@ -367,7 +394,9 @@ console.log('The ID is: ', idx)
         if(bar[4] > positionArray[z]['entryPrice'] || bar[3] < positionArray[z]['entryPrice']) {
         positionArray[z]['positionStatus'] = 'open'
         //Move the Stop Price to the Entry Price
+        positionArray[z]['result'] = 'break even'
         positionArray[z]['stopPrice'] = positionArray[z]['entryPrice']
+        resultsData['unfilled'] = resultsData['unfilled'] - 1
 
         console.log('POSITION IS OPEN: The price was outside the Zone in the third bar.')
         console.log('The Fresh Zone: ', freshZones[positionArray[z]['freshZoneIndex']])
@@ -395,7 +424,9 @@ console.log('The ID is: ', idx)
 
       //Check if Price returns in a Rally
       if(freshZones[x]['formation'] === 'rally' && bar[4] <= freshZones[x]['entryPrice'] && freshZones[x]['position']=== false) {
-          positionArray.push({'freshZoneIndex': x, 'entryPrice': freshZones[x]['entryPrice'], 'targetPrice': freshZones[x]['targetPrice'], 'stopPrice': freshZones[x]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': freshZones[x]['formation'] } )
+          positionArray.push({'freshZoneIndex': x, 'entryPrice': freshZones[x]['entryPrice'], 'targetPrice': freshZones[x]['targetPrice'], 'stopPrice': freshZones[x]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': freshZones[x]['formation'], 'result': 'unfilled' } )
+
+          resultsData['unfilled'] = resultsData['unfilled'] + 1
 
           freshZones[x]['position'] = true
 
@@ -407,7 +438,9 @@ console.log('The ID is: ', idx)
       //Check if Price returns in a Drop
       if(freshZones[x]['formation'] === 'drop' && bar[3] >= freshZones[x]['entryPrice'] && freshZones[x]['position'] === false) {
 
-          positionArray.push({'freshZoneIndex': x, 'entryPrice': freshZones[x]['entryPrice'], 'targetPrice': freshZones[x]['targetPrice'], 'stopPrice': freshZones[x]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': freshZones[x]['formation'] } )
+          positionArray.push({'freshZoneIndex': x, 'entryPrice': freshZones[x]['entryPrice'], 'targetPrice': freshZones[x]['targetPrice'], 'stopPrice': freshZones[x]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': freshZones[x]['formation'], 'result': 'unfilled' } )
+
+          resultsData['unfilled'] = resultsData['unfilled'] + 1
 
           freshZones[x]['position'] = true
 
@@ -1135,23 +1168,23 @@ fillColor: 'green'
             }
 
 export const cylinderData = [{ name: 'T3',
-                              data: [6],
+                              data: [resultsData['t3']],
                               color: '#008000'
                               }, {
                               name: 'BE',
-                              data: [3],
+                              data: [resultsData['break even']],
                               color: '#0000FF'
                               }, {
                               name: 'S',
-                              data: [3],
+                              data: [resultsData['stop']],
                               color: '#FF0000'
                               }, {
                               name: 'UNF',
-                              data: [4],
+                              data: [resultsData['unfilled']],
                               color: '#D3D3D3'
                             },
                             {
                               colorByPoint: true
                             }]
 
-  export const resultsData = []
+  export const finalResultsData = resultsData
