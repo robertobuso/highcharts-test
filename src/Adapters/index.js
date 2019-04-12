@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import newEsPrices from '../Data/newEsPrices.js';
+import esPrices from '../Data/esPrices.js';
 import moment from 'moment-timezone';
 
 let newArray =  []
 
 //Variables for Parameters Form
-let globalIncomingLegPercentage = 0.25
-let outgoingLegPercentage = 0.4
+let globalIncomingLegPercentage = 0.0
+let outgoingLegPercentage = 0.8
 
 
-while (newEsPrices.length > 1) {
-    const bar = newEsPrices.splice(0, 9)
+while (esPrices.length > 1) {
+    const bar = esPrices.splice(0, 9)
     // bar.map(dataPoint => {
     //   if (bar.indexOf(dataPoint) === 0 || bar.indexOf(dataPoint) === 1) {
     //     return dataPoint.toString()
@@ -396,7 +396,6 @@ console.log('The ID is: ', idx)
         //Move the Stop Price to the Entry Price
         positionArray[z]['result'] = 'break even'
         positionArray[z]['stopPrice'] = positionArray[z]['entryPrice']
-        resultsData['unfilled'] = resultsData['unfilled'] - 1
 
         console.log('POSITION IS OPEN: The price was outside the Zone in the third bar.')
         console.log('The Fresh Zone: ', freshZones[positionArray[z]['freshZoneIndex']])
