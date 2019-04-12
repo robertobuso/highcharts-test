@@ -6,6 +6,7 @@ let newArray =  []
 
 //Variables for Parameters Form
 let globalIncomingLegPercentage = 0.25
+let outgoingLegPercentage = 0.4
 
 
 while (newEsPrices.length > 1) {
@@ -718,7 +719,7 @@ console.log('The ID is: ', idx)
         (bar[4] <= zoneCeiling && bar[3] >= zoneFloor) &&
 
         //The part of the Outgoing Leg Inside Zone is equal to or less than 40% of the zoneHeight
-        (percentageInsideZone <= 0.4 &&
+        (percentageInsideZone <= outgoingLegPercentage &&
 
         //The distance between Highest Price of the Explosive Bar or Group is equal to or more than 1X or 2X the zoneHeight
         (barDistanceFromDemandZone >= zoneHeight || groupDistanceFromDemandZone >= (zoneHeight * 2))
@@ -755,7 +756,7 @@ console.log('The ID is: ', idx)
           }
         } else {
           if (formation !== 'drop') {
-            if (percentageInsideZone > 0.4) {
+            if (percentageInsideZone > outgoingLegPercentage) {
               console.log('Outgoing Leg is more than 40% inside zone.')
             }
             console.log('This Rally is NOT explosive.')
@@ -796,7 +797,7 @@ console.log('The ID is: ', idx)
         (bar[4] <= zoneCeiling && bar[3] >= zoneFloor) &&
 
         //The part of the Outgoing Leg Inside Zone is equal to or less than 40% of the zoneHeight
-        (percentageInsideZone <= 0.4 &&
+        (percentageInsideZone <= outgoingLegPercentage &&
 
         //The distance between Lowest Price of the Explosive Bar or Group is equal to or more than 1X or 2X the zoneHeight
         (barDistanceFromSupplyZone >= zoneHeight || groupDistanceFromSupplyZone >= (zoneHeight * 2))
@@ -836,7 +837,7 @@ console.log('The ID is: ', idx)
         }
       } else {
         if (formation !== 'rally') {
-          if (percentageInsideZone > 0.4) {
+          if (percentageInsideZone > outgoingLegPercentage) {
             console.log('Outgoing Leg is more than 40% inside zone.')
           }
 
@@ -906,7 +907,7 @@ console.log('The ID is: ', idx)
 
     export const priceReturnedMarker = priceReturnedBars.map ( bar =>  {
       return {'x': bar,
-      'title': ' '}
+      'title': 'T3'}
     })
 
     export const stopMarker = stopBars.map ( bar =>  {
@@ -1042,7 +1043,7 @@ fillColor: 'green'
       showInLegend: false,
       borderColor: '',
       borderWidth: 2,
-      color: 'blue',
+      color: 'purple',
       opacity: 0.3,
       zIndex: -1,
       data: notFreshZoneData.flat(),
@@ -1132,3 +1133,25 @@ fillColor: 'green'
                 plotLines: zoneLineMarkers
             }
             }
+
+export const cylinderData = [{ name: 'T3',
+                              data: [6],
+                              color: '#008000'
+                              }, {
+                              name: 'BE',
+                              data: [3],
+                              color: '#0000FF'
+                              }, {
+                              name: 'S',
+                              data: [3],
+                              color: '#FF0000'
+                              }, {
+                              name: 'UNF',
+                              data: [4],
+                              color: '#D3D3D3'
+                            },
+                            {
+                              colorByPoint: true
+                            }]
+
+  export const resultsData = []

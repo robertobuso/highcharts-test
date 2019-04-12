@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import Highcharts from 'highcharts/highstock';
 
+import {cylinderData} from '../Adapters'
+
 import HighchartsReact from '../HighchartsReact.js'
 
 require('highcharts/highcharts-3d.js')(Highcharts)
@@ -78,31 +80,13 @@ const options = {
        enabled: false
    },
 
-    series: [
-            {
-        name: 'T3',
-        data: [4],
-        color: '#008000'
-    }, {
-        name: 'BE',
-        data: [1],
-        color: '#0000FF'
-    }, {
-        name: 'S',
-        data: [2],
-        color: '#FF0000'
-    }, {
-        name: 'UNF',
-        data: [1],
-        color: '#D3D3D3'
-    },
-    {
-      colorByPoint: true
-    }]
-      }
+    series: cylinderData
+  }
 
       class CylinderChart extends Component {
+
           render() {
+            console.log('cylinderData: ', cylinderData)
             return (
                <div>
                 <HighchartsReact

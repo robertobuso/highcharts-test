@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import {resultsData} from '../Adapters'
 
 class ResultsTable extends Component {
     render() {
