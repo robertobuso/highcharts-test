@@ -48,6 +48,7 @@ let zoneHeight
 let barDistanceFromDemandZone
 let barDistanceFromSupplyZone
 let zoneData = []
+let notFreshZoneData = []
 let explosiveGroup = []
 let groupDistanceFromSupplyZone
 let lowestPriceArray
@@ -200,6 +201,9 @@ console.log('zone: ', zone)
 
           notFreshZones.push(zone)
 
+          //Set data to draw Not Fresh Zone in chart
+          notFreshZoneData.push(zone['bases'].map( bar => {return {'x': createDateTime(bar), 'high': zone['zoneCeiling'], 'low':  zone['zoneFloor']}}))
+
           potentialFreshZones.splice(potentialFreshZones.indexOf(zone), 1)
 
           console.log('ZONE IS NOT FRESH. The Price Returned to Zone More than Once - Rally ', invalidZones[invalidZones.length -1])
@@ -208,6 +212,9 @@ console.log('zone: ', zone)
           zone['type'] = 'Not Fresh - The Price Went in More than 25% -- Rally'
 
           notFreshZones.push(zone)
+
+          //Set data to draw Not Fresh Zone in chart
+          notFreshZoneData.push(zone['bases'].map( bar => {return {'x': createDateTime(bar), 'high': zone['zoneCeiling'], 'low':  zone['zoneFloor']}}))
 
           potentialFreshZones.splice(potentialFreshZones.indexOf(zone), 1)
 
@@ -258,6 +265,9 @@ console.log('zone: ', zone)
 
           notFreshZones.push(zone)
 
+          //Set data to draw Not Fresh Zone in chart
+          notFreshZoneData.push(zone['bases'].map( bar => {return {'x': createDateTime(bar), 'high': zone['zoneCeiling'], 'low':  zone['zoneFloor']}}))
+
           potentialFreshZones.splice(potentialFreshZones.indexOf(zone), 1)
 
           console.log('ZONE IS NOT FRESH. The Price Returned to Zone More than Once - Drop ', invalidZones[invalidZones.length -1])
@@ -266,6 +276,9 @@ console.log('zone: ', zone)
           zone['type'] = 'Not Fresh - The Price Went in More than 25% -- Drop'
 
           notFreshZones.push(zone)
+
+          //Set data to draw Not Fresh Zone in chart
+          notFreshZoneData.push(zone['bases'].map( bar => {return {'x': createDateTime(bar), 'high': zone['zoneCeiling'], 'low':  zone['zoneFloor']}}))
 
           potentialFreshZones.splice(potentialFreshZones.indexOf(zone), 1)
 
@@ -1017,7 +1030,24 @@ fillColor: 'green'
     zIndex: -1,
     data: zoneData.flat(),
     pointRange: 3600000
-  }
+  },
+                {
+    	type: 'columnrange',
+      name: '',
+      id: 'zone',
+      grouping: false,
+      groupPadding: true,
+      pointPadding: 1,
+      borderRadius: 0,
+      showInLegend: false,
+      borderColor: '',
+      borderWidth: 2,
+      color: 'blue',
+      opacity: 0.3,
+      zIndex: -1,
+      data: notFreshZoneData.flat(),
+      pointRange: 3600000
+    }
       ],
       yAxis: {
           min: 2700,
