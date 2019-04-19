@@ -5,7 +5,7 @@ import moment from 'moment-timezone';
 let newArray =  []
 
 //Variables for Parameters Form
-let globalIncomingLegPercentage = 0.0
+let globalIncomingLegPercentage = 0
 let outgoingLegPercentage = 0.4
 let explosiveBarMultiplier = 1
 let explosiveGroupMultiplier = 2
@@ -707,8 +707,8 @@ console.log('The ID is: ', idx)
           }
         }
 
-        // Are there are more Leg-Bases than Bases?
-        if( (numberOfLegs/potentialZone.length) > 0.5) {
+        //Are there are more Leg-Bases than Bases?
+        if( (numberOfLegs/potentialZone.length) >= 0.5) {
 
           zoneInvalidatedByLegBases = true
 
@@ -794,6 +794,7 @@ console.log('The ID is: ', idx)
         } else {
           if (formation !== 'drop') {
             if (percentageInsideZone > outgoingLegPercentage) {
+              console.log('percentageInsideZone: ', percentageInsideZone)
               console.log('Outgoing Leg is more than 40% inside zone.')
             }
             console.log('This Rally is NOT explosive.')
