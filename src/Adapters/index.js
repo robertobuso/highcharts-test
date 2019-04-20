@@ -990,7 +990,7 @@ console.log('The ID is: ', idx)
 
     export const options = {
       chart: {
-        zoomType: 'xy',
+        zoomType: 'x',
 
         xAxis: {
           minRange: 3600000
@@ -1102,7 +1102,6 @@ fillColor: 'white'
     }
       ],
       yAxis: {
-          min: 2700,
           tickInterval: 10,
           title: {
               text: 'Price'
@@ -1113,7 +1112,7 @@ fillColor: 'white'
 
       export const optionsTwo = {
             chart: {
-              zoomType: 'xy',
+              zoomType: 'x',
 
               xAxis: {
                 minRange: 3600000
@@ -1176,7 +1175,6 @@ fillColor: 'white'
         }
             ],
             yAxis: {
-                min: 2700,
                 tickInterval: 10,
                 title: {
                     text: 'Price'
