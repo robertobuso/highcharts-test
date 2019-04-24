@@ -10,6 +10,7 @@ let outgoingLegPercentage = 0.4
 let explosiveBarMultiplier = 1
 let explosiveGroupMultiplier = 2
 let veryExplosiveGroupMultiplier = 4
+let explosiveGroupBars = 5
 
 while (newEsPrices.length > 1) {
     const bar = newEsPrices.splice(0, 9)
@@ -79,7 +80,8 @@ let invalidIncomingLegZones = []
 let invalidLegBaseZones = []
 let invalidAttractorZones = []
 let unusedZones = []
-let resultsData = {'t3': 0, 'break even': 0, 'stop': 0, 'unfilled': 0}
+let resultsData = {'t3': 0, 'break even': 0, 'stop': 0, 'open': 0, 'unfilled': 0}
+let filledPosition = {}
 
 //Set initial ceiling and floor based on direction of first bar
   if (newArray[0][5] - newArray[0][2] >= 0) {
@@ -160,6 +162,14 @@ export const finalData = newArray.map( bar => {
 
     freshZones.push([ {'bases': distinctPotentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'fresh'}, {'incomingLeg': 0}, {'outgoingLeg': 3} ])
 
+    const newFreshZoneIndex = freshZones.length - 1
+
+    positionArray.push({'freshZoneIndex': newFreshZoneIndex, 'entryPrice': freshZones[newFreshZoneIndex]['entryPrice'], 'targetPrice': freshZones[newFreshZoneIndex]['targetPrice'], 'stopPrice': freshZones[newFreshZoneIndex]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': freshZones[newFreshZoneIndex]['formation'], 'result': 'unfilled' } )
+
+    freshZones[newFreshZoneIndex]['position'] = true
+
+    resultsData['unfilled'] = resultsData['unfilled'] + 1
+
     potentialZone = []
   }
 
@@ -170,6 +180,14 @@ export const finalData = newArray.map( bar => {
 
     freshZones.push([ {'bases': distinctPotentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'fresh'}, {'incomingLeg': 0}, {'outgoingLeg': 3} ])
 
+    const newFreshZoneIndex = freshZones.length - 1
+
+    positionArray.push({'freshZoneIndex': newFreshZoneIndex, 'entryPrice': freshZones[newFreshZoneIndex]['entryPrice'], 'targetPrice': freshZones[newFreshZoneIndex]['targetPrice'], 'stopPrice': freshZones[newFreshZoneIndex]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': freshZones[newFreshZoneIndex]['formation'], 'result': 'unfilled' } )
+
+    freshZones[newFreshZoneIndex]['position'] = true
+
+    resultsData['unfilled'] = resultsData['unfilled'] + 1
+
     potentialZone = []
   }
   }
@@ -179,11 +197,11 @@ export const finalData = newArray.map( bar => {
 
   //Check Bar for Potential Fresh Zone
 
-  //Check to see if the price returns to Zone in all the open potential Zones
+  //Check to see if the price returns to Zone in all the open potential Zones (is it fresh?)
   const newPotentialFreshArray = [...potentialFreshZones]
 
   newPotentialFreshArray.forEach ( zone =>  {
-console.log('zone: ', zone)
+    console.log('zone: ', zone)
 
     //Check in Rally
     if (zone['type'] === 'checking for fresh' && zone['formation'] === 'rally'){
@@ -235,6 +253,12 @@ console.log('zone: ', zone)
           zone['stopPrice'] = zone['zoneFloor'] - (averageTrueRange * 0.02)
 
           freshZones.push(zone)
+
+          positionArray.push({'freshZoneIndex': (freshZones.length - 1), 'entryPrice': zone['entryPrice'], 'targetPrice': zone['targetPrice'], 'stopPrice': zone['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': zone['formation'], 'result': 'unfilled' } )
+
+          zone['position'] = true
+
+          resultsData['unfilled'] = resultsData['unfilled'] + 1
 
           //Set data to draw Zone in chart
 
@@ -301,6 +325,12 @@ console.log('zone: ', zone)
 
           freshZones.push(zone)
 
+          positionArray.push({'freshZoneIndex': (freshZones.length - 1), 'entryPrice': zone['entryPrice'], 'targetPrice': zone['targetPrice'], 'stopPrice': zone['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': zone['formation'], 'result': 'unfilled' } )
+
+          zone['position'] = true
+
+          resultsData['unfilled'] = resultsData['unfilled'] + 1
+
           //Set data to draw Zone in chart
           zoneData.push(zone['bases'].map( bar => {return {'x': createDateTime(bar), 'high': zone['zoneCeiling'], 'low':  zone['zoneFloor']}}))
 
@@ -328,7 +358,6 @@ console.log('The ID is: ', idx)
       if (positionArray[z]['zoneFormation'] === 'rally' && positionArray[z]['positionStatus'] === 'open' && bar[4] <= positionArray[z]['stopPrice']) {
 
         positionArray[z]['positionStatus'] = 'closed'
-        resultsData['unfilled'] = resultsData['unfilled'] - 1
 
         if (positionArray[z]['result'] === 'break even') {
           positionArray[z]['type'] = 'break even'
@@ -337,6 +366,7 @@ console.log('The ID is: ', idx)
           console.log('PRICE HIT THE BREAK EVEN ON RALLY!')
         } else {
           positionArray[z]['type'] = 'stop'
+          positionArray[z]['result'] = 'stop'
           resultsData['stop'] = resultsData['stop'] + 1
           stopBars.push(dateTime)
           console.log('PRICE HIT THE STOP ON RALLY!')
@@ -346,7 +376,6 @@ console.log('The ID is: ', idx)
       //Check if an Open Position Should Be Closed Successfully - Rally
       else if (positionArray[z]['zoneFormation'] === 'rally' && positionArray[z]['positionStatus'] === 'open' && bar[3] >= positionArray[z]['targetPrice']) {
         positionArray[z]['positionStatus'] = 'closed'
-        resultsData['unfilled'] = resultsData['unfilled'] - 1
         positionArray[z]['type'] = 't3'
         resultsData['t3'] = resultsData['t3'] + 1
         priceReturnedBars.push(dateTime)
@@ -359,7 +388,6 @@ console.log('The ID is: ', idx)
       if (positionArray[z]['zoneFormation'] === 'drop' && positionArray[z]['positionStatus'] === 'open' && bar[3] >= positionArray[z]['stopPrice']) {
 
         positionArray[z]['positionStatus'] = 'closed'
-        resultsData['unfilled'] = resultsData['unfilled'] - 1
 
         if (positionArray[z]['result'] === 'break even') {
           positionArray[z]['type'] = 'break even'
@@ -368,7 +396,9 @@ console.log('The ID is: ', idx)
           console.log('PRICE HIT THE BREAK EVEN ON DROP!')
         } else {
           positionArray[z]['type'] = 'stop'
+          positionArray[z]['result'] = 'stop'
           resultsData['stop'] = resultsData['stop'] + 1
+
           stopBars.push(dateTime)
           console.log('PRICE HIT THE STOP ON DROP!')
         }
@@ -377,7 +407,6 @@ console.log('The ID is: ', idx)
       //Check if an Open Position Should Be Closed Successfully - Drop
       else if (positionArray[z]['zoneFormation'] === 'drop' && positionArray[z]['positionStatus'] === 'open' && bar[4] <= positionArray[z]['targetPrice']) {
         positionArray[z]['positionStatus'] = 'closed'
-        resultsData['unfilled'] = resultsData['unfilled'] - 1
         positionArray[z]['type'] = 't3'
 
         priceReturnedBars.push(dateTime)
@@ -391,16 +420,16 @@ console.log('The ID is: ', idx)
       //Check if a position should be Opened or Closed - depending on whether the price is inside the Zone on the third bar after triggering position
       if (positionArray[z]['barsAfterPositionOpens'] < 1) {
         positionArray[z]['barsAfterPositionOpens'] = positionArray[z]['barsAfterPositionOpens'] + 1
-      } else if ((positionArray[z]['barsAfterPositionOpens'] === 1) && (positionArray[z]['positionStatus'] === 'unfilled')) {
+      } else if ((positionArray[z]['barsAfterPositionOpens'] === 1) && (positionArray[z]['positionStatus'] === 'open')) {
 
         //Rally or Drop
         if(bar[4] > positionArray[z]['entryPrice'] || bar[3] < positionArray[z]['entryPrice']) {
-        positionArray[z]['positionStatus'] = 'open'
+        positionArray[z]['positionStatus'] = 'filled'
         //Move the Stop Price to the Entry Price
         positionArray[z]['result'] = 'break even'
         positionArray[z]['stopPrice'] = positionArray[z]['entryPrice']
 
-        console.log('POSITION IS OPEN: The price was outside the Zone in the third bar.')
+        console.log('POSITION IS FILLED and OPEN: The price was outside the Zone in the third bar.')
         console.log('The Fresh Zone: ', freshZones[positionArray[z]['freshZoneIndex']])
         console.log('The Bar Where the Price Returned: ', positionArray[z]['priceReturnedId'])
         console.log('The Third Bar: ', bar)
@@ -425,13 +454,17 @@ console.log('The ID is: ', idx)
     for (let x = 0; x < freshZones.length; x++) {
 
       //Check if Price returns in a Rally
-      if(freshZones[x]['formation'] === 'rally' && bar[4] <= freshZones[x]['entryPrice'] && freshZones[x]['position']=== false) {
+      if(freshZones[x]['formation'] === 'rally' && bar[4] <= freshZones[x]['entryPrice'] && freshZones[x]['position']=== true) {
 
-          positionArray.push({'freshZoneIndex': x, 'entryPrice': freshZones[x]['entryPrice'], 'targetPrice': freshZones[x]['targetPrice'], 'stopPrice': freshZones[x]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': freshZones[x]['formation'], 'result': 'unfilled' } )
+      filledPosition = positionArray.find(zone => zone['freshZoneIndex'] === x)
 
-          resultsData['unfilled'] = resultsData['unfilled'] + 1
+      filledPosition['positionStatus'] = 'open'
+      filledPosition['result'] = 'open'
 
-          freshZones[x]['position'] = true
+      freshZones[x]['position'] = false
+
+      resultsData['unfilled'] = resultsData['unfilled'] - 1
+      resultsData['open'] = resultsData['open'] + 1
 
         console.log('RALLY-- The price returned to Zone #', x)
         console.log('Bar: ', bar)
@@ -439,13 +472,17 @@ console.log('The ID is: ', idx)
         console.log('zone: ', freshZones[x])
       }
       //Check if Price returns in a Drop
-      if(freshZones[x]['formation'] === 'drop' && bar[3] >= freshZones[x]['entryPrice'] && freshZones[x]['position'] === false) {
+      if(freshZones[x]['formation'] === 'drop' && bar[3] >= freshZones[x]['entryPrice'] && freshZones[x]['position'] === true) {
 
-          positionArray.push({'freshZoneIndex': x, 'entryPrice': freshZones[x]['entryPrice'], 'targetPrice': freshZones[x]['targetPrice'], 'stopPrice': freshZones[x]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': freshZones[x]['formation'], 'result': 'unfilled' } )
+        filledPosition = positionArray.find(zone => zone['freshZoneIndex'] === x)
 
-          resultsData['unfilled'] = resultsData['unfilled'] + 1
+        filledPosition['positionStatus'] = 'open'
+        filledPosition['result'] = 'open'
 
-          freshZones[x]['position'] = true
+        freshZones[x]['position'] = false
+
+        resultsData['unfilled'] = resultsData['unfilled'] - 1
+        resultsData['open'] = resultsData['open'] + 1
 
         console.log('DROP-- The price returned to Zone #', x)
         console.log('Bar: ', bar)
@@ -627,7 +664,7 @@ console.log('The ID is: ', idx)
 
         //Create potential Explosive Group array
         explosiveGroup =[]
-        for (let z = 0; z < 4; z++) {
+        for (let z = 0; z < explosiveGroupBars; z++) {
           explosiveGroup.push(newArray[idx + z])
         }
 
@@ -781,15 +818,11 @@ console.log('The ID is: ', idx)
             }
 
           if (demandAttractorZoneFound === false) {
-            console.log('POTENTIAL FRESH ZONE RALLY! Inserting Zone into potentialFreshZones. Line 703')
+            console.log('Percentage of Outgoing Leg inside the Zone: ', percentageInsideZone)
+            console.log('POTENTIAL FRESH ZONE RALLY! Inserting Zone into potentialFreshZones.')
 
           //Insert New Potential Zone into Array to Check if It's Fresh
-            potentialFreshZones.push( {'position': false, 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'checking for fresh', 'incomingLeg': i, 'outgoingLeg': idx, 'isItFreshBars': 1} )
-
-            //Does the Outgoing Leg return to the zone?
-            if (newArray[idx][3] >= zoneFloor && newArray[idx][4] <= zoneCeiling) {
-              potentialFreshZones[potentialFreshZones.length -1]['priceReturnedToZone'] = 1
-            }
+            potentialFreshZones.push( {'position': false, 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'checking for fresh', 'incomingLeg': i, 'outgoingLeg': idx, 'isItFreshBars': 1, 'priceReturnedToZone': 0} )
           }
         } else {
           if (formation !== 'drop') {
@@ -865,13 +898,7 @@ console.log('The ID is: ', idx)
             console.log('POTENTIAL FRESH ZONE DROP! Inserting into potentialFreshZones array.')
 
           //Insert New Potential Zone into Array to Check if It's Fresh
-            potentialFreshZones.push( {'position': false, 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'checking for fresh', 'incomingLeg': i, 'outgoingLeg': idx, 'isItFreshBars': 1} )
-
-          //Does the Outgoing Leg return to the zone?
-          if (newArray[idx][3] >= zoneFloor && newArray[idx][4] <= zoneCeiling) {
-
-            potentialFreshZones[potentialFreshZones.length -1]['priceReturnedToZone'] = 1
-          }
+            potentialFreshZones.push( {'position': false, 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'checking for fresh', 'incomingLeg': i, 'outgoingLeg': idx, 'isItFreshBars': 1, 'priceReturnedToZone': 0} )
         }
       } else {
         if (formation !== 'rally') {
