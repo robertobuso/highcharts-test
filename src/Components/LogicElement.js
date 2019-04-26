@@ -1,19 +1,24 @@
 import React, { Component } from 'react';
 import { Grid } from 'semantic-ui-react'
-import { finalIncomingLegPercentage } from '../Adapters'
-
+import {options, finalPotentialZones, finalPositions, notFresh, badIncomingLeg, badLegBases, foundAttractor, unused, finalIncomingLegPercentage} from '../Adapters'
 
 class LogicElement extends Component {
 
-  state = { receivingData: 'HELLO DOLLY'}
+
+  constructor(props) {
+    super(props);
+    this.state = { options: {}}
+    }
+
 
   componentDidMount() {
-    this.setState({ receivingData: this.state.receivingData + this.props.testData})
+    this.setState({ options: options}, () => this.props.manageData(this.state.options))
+
   }
 
   render() {
     return (
-      this.props.manageData(this.state.receivingData)
+      <div></div>
     )
   }
 

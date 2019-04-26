@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Highcharts from 'highcharts/highstock';
 
-import {options, finalPotentialZones, finalPositions, notFresh, badIncomingLeg, badLegBases, foundAttractor, unused} from '../Adapters'
+import { finalPotentialZones, finalPositions, notFresh, badIncomingLeg, badLegBases, foundAttractor, unused} from '../Adapters'
 
 import HighchartsReact from '../HighchartsReact.js'
 import LogicElement from './LogicElement.js'
@@ -16,12 +16,14 @@ require('highcharts/highcharts-more.src.js')(Highcharts)
 
 class EsChart extends Component {
 
-    state = {test: 'IT WORKS DUDE'}
+  constructor(props) {
+    super(props);
+    this.state = { formData: [],
+                    options: {} }
+    }
 
     manageData = (data) => {
-       console.log('THE DATA IS: ', data)
-       debugger
-       return data
+       this.setState({options: data})
     }
 
     render() {
@@ -36,7 +38,7 @@ class EsChart extends Component {
       return (
         <>
         <LogicElement
-          testData={this.state.test}
+          testData={this.state.formData}
           manageData={this.manageData}
           />
 
@@ -44,7 +46,7 @@ class EsChart extends Component {
           <HighchartsReact
             highcharts={Highcharts}
             constructorType={'stockChart'}
-            options={options}
+            options={this.state.options}
           />
         </div>
         </>
