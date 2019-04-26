@@ -362,12 +362,16 @@ console.log('The ID is: ', idx)
         if (positionArray[z]['result'] === 'break even') {
           positionArray[z]['type'] = 'break even'
           resultsData['break even'] = resultsData['break even'] + 1
+          resultsData['open'] = resultsData['open'] - 1
+
           breakEvenBars.push(dateTime)
+
           console.log('PRICE HIT THE BREAK EVEN ON RALLY!')
         } else {
           positionArray[z]['type'] = 'stop'
           positionArray[z]['result'] = 'stop'
           resultsData['stop'] = resultsData['stop'] + 1
+          resultsData['open'] = resultsData['open'] - 1
           stopBars.push(dateTime)
           console.log('PRICE HIT THE STOP ON RALLY!')
         }
@@ -392,12 +396,16 @@ console.log('The ID is: ', idx)
         if (positionArray[z]['result'] === 'break even') {
           positionArray[z]['type'] = 'break even'
           resultsData['break even'] = resultsData['break even'] + 1
+          resultsData['open'] = resultsData['open'] - 1
+
           breakEvenBars.push(dateTime)
+
           console.log('PRICE HIT THE BREAK EVEN ON DROP!')
         } else {
           positionArray[z]['type'] = 'stop'
           positionArray[z]['result'] = 'stop'
           resultsData['stop'] = resultsData['stop'] + 1
+          resultsData['open'] = resultsData['open'] - 1
 
           stopBars.push(dateTime)
           console.log('PRICE HIT THE STOP ON DROP!')
@@ -1218,6 +1226,10 @@ export const cylinderData = [{ name: 'T3',
                               data: [resultsData['break even']],
                               color: '#0000FF'
                               }, {
+                              name: 'O',
+                              data: [resultsData['open']],
+                              color: '#FF00FF'
+                              },{
                               name: 'S',
                               data: [resultsData['stop']],
                               color: '#FF0000'

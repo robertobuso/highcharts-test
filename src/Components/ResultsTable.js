@@ -35,6 +35,11 @@ class ResultsTable extends Component {
               <td>{finalResultsData['break even']}</td>
             </tr>
             <tr style={{textAlign:'center'}}>
+              <td>Open</td>
+              <td></td>
+              <td>{finalResultsData['open']}</td>
+            </tr>
+            <tr style={{textAlign:'center'}}>
               <td>Stop</td>
               <td></td>
               <td>{finalResultsData['stop']}</td>
