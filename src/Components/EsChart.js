@@ -4,6 +4,7 @@ import Highcharts from 'highcharts/highstock';
 import {options, finalPotentialZones, finalPositions, notFresh, badIncomingLeg, badLegBases, foundAttractor, unused} from '../Adapters'
 
 import HighchartsReact from '../HighchartsReact.js'
+import LogicElement from './LogicElement.js'
 
 require('highcharts/indicators/indicators')(Highcharts)
 require('highcharts/indicators/pivot-points')(Highcharts)
@@ -15,6 +16,14 @@ require('highcharts/highcharts-more.src.js')(Highcharts)
 
 class EsChart extends Component {
 
+    state = {test: 'IT WORKS DUDE'}
+
+    manageData = (data) => {
+       console.log('THE DATA IS: ', data)
+       debugger
+       return data
+    }
+
     render() {
       console.log('Fresh Zones: ', finalPotentialZones)
       console.log('NOT Fresh Zones: ', notFresh)
@@ -25,6 +34,12 @@ class EsChart extends Component {
       console.log('Positions: ', finalPositions)
 
       return (
+        <>
+        <LogicElement
+          testData={this.state.test}
+          manageData={this.manageData}
+          />
+
          <div onClick={this.props.handleChartClick}>
           <HighchartsReact
             highcharts={Highcharts}
@@ -32,6 +47,7 @@ class EsChart extends Component {
             options={options}
           />
         </div>
+        </>
       )
     }
 }
