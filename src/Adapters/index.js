@@ -418,32 +418,32 @@ console.log('The ID is: ', idx)
       }
 
       //Check if a position should be Opened or Closed - depending on whether the price is inside the Zone on the third bar after triggering position
-      if (positionArray[z]['barsAfterPositionOpens'] < 1) {
+      if (positionArray[z]['barsAfterPositionOpens'] < 2) {
         positionArray[z]['barsAfterPositionOpens'] = positionArray[z]['barsAfterPositionOpens'] + 1
       } else if ((positionArray[z]['barsAfterPositionOpens'] === 1) && (positionArray[z]['positionStatus'] === 'open')) {
 
-        //Rally or Drop
-        if(bar[4] > positionArray[z]['entryPrice'] || bar[3] < positionArray[z]['entryPrice']) {
-        positionArray[z]['positionStatus'] = 'filled'
-        //Move the Stop Price to the Entry Price
-        positionArray[z]['result'] = 'break even'
-        positionArray[z]['stopPrice'] = positionArray[z]['entryPrice']
+        //Rally - Drop
+          if( (positionArray['zoneFormation'] === 'rally' && bar[2] <= positionArray[z]['entryPrice']) || (positionArray['zoneFormation'] === 'drop' && bar[2] >= positionArray[z]['entryPrice']) ) {
+          positionArray[z]['positionStatus'] = 'filled'
+          //Move the Stop Price to the Entry Price
+          positionArray[z]['result'] = 'break even'
+          positionArray[z]['stopPrice'] = positionArray[z]['entryPrice']
 
-        console.log('POSITION IS FILLED and OPEN: The price was outside the Zone in the third bar.')
-        console.log('The Fresh Zone: ', freshZones[positionArray[z]['freshZoneIndex']])
-        console.log('The Bar Where the Price Returned: ', positionArray[z]['priceReturnedId'])
-        console.log('The Third Bar: ', bar)
+          console.log('POSITION IS FILLED and OPEN: The price was outside the Zone in the third bar.')
+          console.log('The Fresh Zone: ', freshZones[positionArray[z]['freshZoneIndex']])
+          console.log('The Bar Where the Price Returned: ', positionArray[z]['priceReturnedId'])
+          console.log('The Third Bar: ', bar)
 
-      } else {
-        positionArray[z]['positionStatus'] = 'closed'
-        positionArray[z]['type'] = 'price in zone after 3 bars'
-        positionClosedZone.push(dateTime)
-        console.log('POSITION IS CLOSED: The price was inside the Zone in the third bar.')
+        } else {
+          positionArray[z]['positionStatus'] = 'closed'
+          positionArray[z]['type'] = 'price in zone after 3 bars'
+          positionClosedZone.push(dateTime)
+          console.log('POSITION IS CLOSED: The price was inside the Zone in the third bar.')
+        }
+          console.log('Third Bar After Price ReEnters Zone: ', bar[4])
+          console.log('zoneCeiling: ', freshZones[positionArray[z]['freshZoneIndex']]['zoneCeiling'])
+        }
       }
-        console.log('Third Bar After Price ReEnters Zone: ', bar[4])
-        console.log('zoneCeiling: ', freshZones[positionArray[z]['freshZoneIndex']]['zoneCeiling'])
-      }
-    }
   } else {
     console.log('There were NO POSITIONS')
   }
