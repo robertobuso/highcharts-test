@@ -13,7 +13,9 @@ class App extends Component {
 
     state = {
       newWindow: false,
-      renderChart: false
+      renderChart: false,
+      incomingLeg: 25,
+      explosiveBarOutgoingLegMultiplier: 1
     }
 
     handleChartClick = () => {
@@ -26,6 +28,12 @@ class App extends Component {
     reRenderChart = (data) => {
       console.log('Re-rendering chart')
       this.setState( { renderChart: !this.state.renderChart})
+    }
+
+    sendFormDataToChart = (key, value) => {
+      this.setState( {
+        [key]: value
+      }, console.log('state in app: ',this.state))
     }
 
     render() {
@@ -60,7 +68,8 @@ class App extends Component {
             <Grid.Column width={14} >
               <EsChart
                 handleChartClick={this.handleChartClick}
-                reRenderChart={this.reRenderChart}/>
+                reRenderChart={this.reRenderChart}
+                formData={this.state}/>
             </Grid.Column>
 
             <Grid.Column  width={2}>
@@ -77,7 +86,8 @@ class App extends Component {
           <Grid.Row>
             <Grid.Column className='input-scroll' style={{height: '240px'}}>
               <ParametersForm
-                reRenderChart={this.reRenderChart}/>
+                reRenderChart={this.reRenderChart}
+                sendFormDataToChart={this.sendFormDataToChart}/>
             </Grid.Column>
           </Grid.Row>
         </Grid>

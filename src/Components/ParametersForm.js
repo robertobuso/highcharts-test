@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { Grid } from 'semantic-ui-react'
-import { finalIncomingLegPercentage } from '../Adapters'
 
 class ParametersForm extends Component {
 
   state = {
-    incomingLeg: 25
+    incomingLeg: 25,
+    explosiveBarOutgoingLegMultiplier: 1
   }
 
   handleSubmit = (event) => {
@@ -13,8 +13,15 @@ class ParametersForm extends Component {
   }
 
   handleIncomingLegChange = (event) => {
-    this.setState( { incomingLeg: event.target.value}, () => finalIncomingLegPercentage(parseFloat(this.state.incomingLeg)) )
+    this.setState( { incomingLeg: event.target.value}, () => this.props.sendFormDataToChart('incomingLeg', parseFloat(this.state.incomingLeg)) )
     // this.props.reRenderChart(this.state.incomingLeg)
+  }
+
+  handleExplosiveBarOutgoingLegChange = (event) => {
+    this.setState( {
+      explosiveBarOutgoingLegMultiplier: event.target.value},
+      () => this.props.sendFormDataToChart('explosiveBarOutgoingLegMultiplier', parseFloat(this.state.explosiveBarOutgoingLegMultiplier))
+    )
   }
 
     render() {
@@ -138,7 +145,7 @@ type='text'
 className='number-input'
 placeholder='1'
 // value={this.state.numberOfGuests}
-// onChange={this.handleInputChange}
+onChange={this.handleExplosiveBarOutgoingLegChange}
 />
 <label className='right-label'>times or more the vertical length of Zone</label>
 <br className='second-parameter'/>
