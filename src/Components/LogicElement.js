@@ -36,7 +36,6 @@ export default class LogicElement extends Component {
 
   handleChartData = (chartData) => {
 console.log('Inside Chart Data')
-debugger
     this.setState( {
       finalPotentialZones: chartData.finalPotentialZones,
       finalPositions: chartData.finalPositions,

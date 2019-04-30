@@ -517,6 +517,8 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                   positionArray[z]['result'] = 'break even'
                   positionArray[z]['stopPrice'] = positionArray[z]['entryPrice']
 
+                  freshZones[positionArray[z]['freshZoneIndex']]['type'] = 'break even'
+
                   console.log('POSITION IS FILLED and OPEN: The price was outside the Zone in the third bar.')
                   console.log('The Fresh Zone: ', freshZones[positionArray[z]['freshZoneIndex']])
                   console.log('The Bar Where the Price Returned: ', positionArray[z]['priceReturnedId'])
@@ -526,6 +528,7 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                   positionArray[z]['positionStatus'] = 'closed'
                   positionArray[z]['type'] = 'price in zone after 3 bars'
                   positionClosedZone.push(dateTime)
+                  freshZones[positionArray[z]['freshZoneIndex']]['type'] = 'closed'
                   console.log('POSITION IS CLOSED: The price was inside the Zone in the third bar.')
                 }
                   console.log('Third Bar After Price ReEnters Zone: ', bar[4])
@@ -550,6 +553,7 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
               filledPosition['result'] = 'open'
 
               freshZones[x]['position'] = false
+              freshZones[x]['type'] = 'open'
 
               resultsData['unfilled'] = resultsData['unfilled'] - 1
               resultsData['open'] = resultsData['open'] + 1
@@ -568,6 +572,7 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                 filledPosition['result'] = 'open'
 
                 freshZones[x]['position'] = false
+                freshZones[x]['type'] = 'open'
 
                 resultsData['unfilled'] = resultsData['unfilled'] - 1
                 resultsData['open'] = resultsData['open'] + 1
@@ -888,15 +893,15 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                 ) ) ) )
                 {
                   //Check for Attractor Zones
-                    //Create Array with the zoneCeiling of all the Previous Rally Zones
+                    //Create Array with the zoneCeiling of all the Previous Rally Zones that are Fresh
 
-                    let newArrayOfZones = freshZones.filter(zone => zone['formation'] === 'rally').map(rallyZone => rallyZone['zoneCeiling'])
+                    let newArrayOfZones = freshZones.filter(zone => zone['formation'] === 'rally')
                     //Check if the previous zoneCeilings are under the current zoneFloor and close enough to Zone
                     for(let x = 0; x < newArrayOfZones.length; x++) {
-                      if (newArrayOfZones[x] < zoneFloor && ( (zoneFloor - newArrayOfZones[x]) <= (zoneHeight * 2) ) ) {
+                      if (newArrayOfZones[x]['zoneCeiling'] < zoneFloor && newArrayOfZones[x]['type'] === 'fresh' && ( (zoneFloor - newArrayOfZones[x]['zoneCeiling']) <= (zoneHeight * 2) ) ) {
                         demandAttractorZoneFound = true
 
-                        invalidAttractorZones.push( {'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid - Attractor Zone Found - Demand'} )
+                        invalidAttractorZones.push( {'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid - Attractor Zone Found - Demand', 'specificAttractorZone': newArrayOfZones[x]} )
 
                         console.log('Attractor Zone! Line 687')
                         break
@@ -965,15 +970,15 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                 {
                   console.log('THIS DROP IS EXPLOSIVE.')
                   //Check for Attractor Zones
-                    //Create Array with the zoneFloor of all the Previous Supply Zones
+                    //Create Array with the zoneFloor of all the Previous Supply Zones that are Fresh
 
-                    let newArrayOfSupplyZones = freshZones.filter(zone => zone['formation'] === 'drop').map(dropZone => dropZone['zoneFloor'])
+                    let newArrayOfSupplyZones = freshZones.filter(zone => zone['formation'] === 'drop')
                     //Check if the previous zoneFloors are over the current zoneCeiling and close enough to Zone
                     for(let x = 0; x < newArrayOfSupplyZones.length; x++) {
-                      if (newArrayOfSupplyZones[x] > zoneCeiling && ( (newArrayOfSupplyZones[x] - zoneCeiling) <= (zoneHeight * 2) ) ) {
+                      if (newArrayOfSupplyZones[x]['zoneFloor'] > zoneCeiling && newArrayOfSupplyZones[x]['type'] === 'fresh' && ( (newArrayOfSupplyZones[x]['zoneFloor'] - zoneCeiling) <= (zoneHeight * 2) ) ) {
                         supplyAttractorZoneFound = true
 
-                        invalidAttractorZones.push( {'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid - Attractor Zone Found - Supply'} )
+                        invalidAttractorZones.push( {'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid - Attractor Zone Found - Supply', 'specificAttractorZone': newArrayOfSupplyZones[x]} )
 
                         console.log('Attractor Zone! Line 726')
                         break
@@ -1052,7 +1057,6 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
     render() {
       console.log('In OptionsComponent, explosiveBarMultiplier is: ', this.state.explosiveBarMultiplier)
       console.log('RENDERING OptionsComponnet. this.state.baseMarkers.length: ', this.state.baseMarkers.length)
-      debugger
       return (
         <div></div>
       )
