@@ -15,7 +15,7 @@ class App extends Component {
       newWindow: false,
       renderChart: false,
       incomingLeg: 25,
-      explosiveBarOutgoingLegMultiplier: 1
+      explosiveBarMultiplier: 1
     }
 
     handleChartClick = () => {

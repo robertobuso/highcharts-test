@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Highcharts from 'highcharts/highstock';
 
 import { Grid } from 'semantic-ui-react'
-// import {options, finalPotentialZones, finalPositions, notFresh, badIncomingLeg, badLegBases, foundAttractor, unused,  createOptions} from '../Adapters'
+import {options, finalPotentialZones, finalPositions, notFresh, badIncomingLeg, badLegBases, foundAttractor, unused,  createOptions} from '../Adapters'
 
 import HighchartsReact from '../HighchartsReact.js'
 import OptionsComponent from './OptionsComponent.js'
@@ -35,6 +35,8 @@ export default class LogicElement extends Component {
   }
 
   handleChartData = (chartData) => {
+console.log('Inside Chart Data')
+debugger
     this.setState( {
       finalPotentialZones: chartData.finalPotentialZones,
       finalPositions: chartData.finalPositions,
@@ -157,7 +159,7 @@ export default class LogicElement extends Component {
       }
        ],
        yAxis: {
-           tickInterval: 10,
+           tickInterval: 0.01,
            title: {
                text: 'Price'
            },

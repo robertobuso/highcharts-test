@@ -28,7 +28,6 @@ class EsChart extends Component {
     }
 
     render() {
-
       return (
         <LogicElement
           formParameters={this.state.formData}

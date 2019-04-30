@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import newEsPrices from '../Data/newEsPrices.js';
+import hGprices from '../Data/hGprices.js';
 import moment from 'moment-timezone';
 
 let potentialZone = []
@@ -61,8 +61,8 @@ let processedData = []
   let veryExplosiveGroupMultiplier = 4
   let explosiveGroupBars = 5
 
-  while (newEsPrices.length > 1) {
-      const bar = newEsPrices.splice(0, 9)
+  while (hGprices.length > 1) {
+      const bar = hGprices.splice(0, 9)
       // bar.map(dataPoint => {
       //   if (bar.indexOf(dataPoint) === 0 || bar.indexOf(dataPoint) === 1) {
       //     return dataPoint.toString()

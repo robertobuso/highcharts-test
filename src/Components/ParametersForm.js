@@ -5,7 +5,7 @@ class ParametersForm extends Component {
 
   state = {
     incomingLeg: 25,
-    explosiveBarOutgoingLegMultiplier: 1
+    explosiveBarMultiplier: 1
   }
 
   handleSubmit = (event) => {
@@ -19,8 +19,8 @@ class ParametersForm extends Component {
 
   handleExplosiveBarOutgoingLegChange = (event) => {
     this.setState( {
-      explosiveBarOutgoingLegMultiplier: event.target.value},
-      () => this.props.sendFormDataToChart('explosiveBarOutgoingLegMultiplier', parseFloat(this.state.explosiveBarOutgoingLegMultiplier))
+      explosiveBarMultiplier: event.target.value},
+      () => this.props.sendFormDataToChart('explosiveBarMultiplier', parseFloat(this.state.explosiveBarMultiplier))
     )
   }
 
