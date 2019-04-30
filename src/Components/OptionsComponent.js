@@ -446,6 +446,8 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
 
                   breakEvenBars.push(dateTime)
 
+                  freshZones[positionArray[z]['freshZoneIndex']]['type'] = 'break even'
+
                   console.log('PRICE HIT THE BREAK EVEN ON RALLY!')
                 } else {
                   positionArray[z]['type'] = 'stop'
@@ -453,6 +455,7 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                   resultsData['stop'] = resultsData['stop'] + 1
                   resultsData['open'] = resultsData['open'] - 1
                   stopBars.push(dateTime)
+                  freshZones[positionArray[z]['freshZoneIndex']]['type'] = 'stop'
                   console.log('PRICE HIT THE STOP ON RALLY!')
                 }
               }
@@ -463,6 +466,7 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                 positionArray[z]['type'] = 't3'
                 resultsData['t3'] = resultsData['t3'] + 1
                 priceReturnedBars.push(dateTime)
+                freshZones[positionArray[z]['freshZoneIndex']]['type'] = 't3'
                 console.log('SUCCESS!!! The price reached the Target Price (T3) - Rally')
                 console.log('ID: ', idx)
                 console.log('Bar: ', bar)
@@ -480,6 +484,8 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
 
                   breakEvenBars.push(dateTime)
 
+                  freshZones[positionArray[z]['freshZoneIndex']]['type'] = 'break even'
+
                   console.log('PRICE HIT THE BREAK EVEN ON DROP!')
                 } else {
                   positionArray[z]['type'] = 'stop'
@@ -488,6 +494,9 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                   resultsData['open'] = resultsData['open'] - 1
 
                   stopBars.push(dateTime)
+
+                  freshZones[positionArray[z]['freshZoneIndex']]['type'] = 'stop'
+
                   console.log('PRICE HIT THE STOP ON DROP!')
                 }
               }
@@ -499,6 +508,8 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
 
                 priceReturnedBars.push(dateTime)
                 resultsData['t3'] = resultsData['t3'] + 1
+
+                freshZones[positionArray[z]['freshZoneIndex']]['type'] = 't3'
 
                 console.log('SUCCESS!!! The price reached the Target Price (T3) - Drop')
                 console.log('ID: ', idx)
@@ -553,7 +564,6 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
               filledPosition['result'] = 'open'
 
               freshZones[x]['position'] = false
-              freshZones[x]['type'] = 'open'
 
               resultsData['unfilled'] = resultsData['unfilled'] - 1
               resultsData['open'] = resultsData['open'] + 1
@@ -572,7 +582,6 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                 filledPosition['result'] = 'open'
 
                 freshZones[x]['position'] = false
-                freshZones[x]['type'] = 'open'
 
                 resultsData['unfilled'] = resultsData['unfilled'] - 1
                 resultsData['open'] = resultsData['open'] + 1
