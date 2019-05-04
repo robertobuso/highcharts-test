@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import hGprices from '../Data/hGprices.js';
+import secondHgPrices from '../Data/secondHgPrices.js';
 import moment from 'moment-timezone';
 
 let potentialZone = []
@@ -48,8 +48,8 @@ let processedData = []
 let newArray =  []
 let actualBases = []
 
-while (hGprices.length > 1) {
-    const bar = hGprices.splice(0, 9)
+while (secondHgPrices.length > 1) {
+    const bar = secondHgPrices.splice(0, 9)
     newArray.push(bar)
   }
 
@@ -799,9 +799,14 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                 // Check Leg-Bases
                 let zoneInvalidatedByLegBases = false
                 let numberOfLegs = 0
+                let potentialZoneWithoutLegBases = [...potentialZone]
+                let legBaseCeiling = 0
+                let legBaseFloor = 0
+                let legBaseZoneHeight = 0
 
                 for (let index = 0; index < potentialZone.length; index++) {
                   if (this.isItALeg(potentialZone[index])) {
+
                     //Count it as a Leg-Base
                     numberOfLegs = numberOfLegs + 1
 
@@ -812,36 +817,87 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                       invalidLegBaseZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because Leg-Base Candlestick Outside Zone Ceiling - Demand'})
 
                       console.log('Invalidated by Leg Bases 1')
+                      break
                     }
 
                     // Check if candlestick of the Leg-Base is higher than the ceiling of the Potential Supply Zone
-                    if (formation === 'drop' && potentialZone[index][2] > zoneCeiling) {
+                    else if (formation === 'drop' && potentialZone[index][2] > zoneCeiling) {
                       zoneInvalidatedByLegBases = true
 
                     invalidLegBaseZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because Leg-Base Candlestick Outside Zone Ceiling - Supply'})
 
-                      console.log('Invalidated by Leg Bases 2')
-
+                    console.log('Invalidated by Leg Bases 2')
+                    break
                     }
 
                     // Check if candlestick of the Leg-Base is lower than the floor of the Potential Demand Zone
-                    if (formation === 'rally' && potentialZone[index][2] < zoneFloor) {
+                    else if (formation === 'rally' && potentialZone[index][2] < zoneFloor) {
                       zoneInvalidatedByLegBases = true
 
                       invalidLegBaseZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because Leg-Base Candlestick Outside Zone Floor - Demand'})
 
                       console.log('Invalidated by Leg Bases 3')
-
+                      break
                     }
 
                     // Check if candlestick of the Leg-Base is lower than the floor of the Potential Supply Zone
-                    if (formation === 'drop' && potentialZone[index][5] < zoneFloor) {
+                    else if (formation === 'drop' && potentialZone[index][5] < zoneFloor) {
                       zoneInvalidatedByLegBases = true
 
                       invalidLegBaseZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because Leg-Base Candlestick Outside Zone Floor - Supply'})
 
                       console.log('Invalidated by Leg Bases 4')
+                      break
+                    }
 
+                    //Create potentialZone without legBase and see if legBase is less than the size of that Zone plus 25% - if legBase is a Rally
+                    potentialZoneWithoutLegBases.splice(index, 1)
+
+                    //Set ceiling, floor and height of the zone without the legBase
+                    potentialZoneWithoutLegBases.forEach(bar => {
+                      if(bar[4] > legBaseFloor) {
+                        legBaseFloor = bar[4]
+                      }
+
+                      if(bar[5] > legBaseCeiling) {
+                        legBaseCeiling = bar[5]
+                      }
+                    })
+
+                    legBaseZoneHeight = legBaseCeiling - legBaseFloor
+
+                    if (potentialZone[index][5] - potentialZone[index][2] > legBaseZoneHeight + (legBaseZoneHeight * 0.25) ) {
+                      zoneInvalidatedByLegBases = true
+
+                      invalidLegBaseZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because Leg-Base Is Longer Than ZoneHeight X 25% of Zone With Bases - Demand'})
+
+                      console.log('Invalidated by Leg Bases - Longer than Base + 25% - Rally')
+                      break
+                    }
+
+                    //Create potentialZone without legBase and see if legBase is less than the size of that Zone plus 25% - if legBase is a Drop
+                    potentialZoneWithoutLegBases.splice(index, 1)
+
+                    //Set ceiling, floor and height of the zone without the legBase
+                    potentialZoneWithoutLegBases.forEach(bar => {
+                      if(bar[5] > legBaseFloor) {
+                        legBaseFloor = bar[5]
+                      }
+
+                      if(bar[3] > legBaseCeiling) {
+                        legBaseCeiling = bar[3]
+                      }
+                    })
+
+                    legBaseZoneHeight = legBaseCeiling - legBaseFloor
+
+                    if (potentialZone[index][2] - potentialZone[index][5] > legBaseZoneHeight + (legBaseZoneHeight * 0.25) ) {
+                      zoneInvalidatedByLegBases = true
+
+                      invalidLegBaseZones.push({'incomingLeg': newArray[i], 'outgoingLeg': newArray[idx], 'bases': potentialZone, 'zoneCeiling': zoneCeiling, 'zoneFloor': zoneFloor, 'zoneHeight': zoneHeight, 'formation': formation, 'type': 'Invalid Because Leg-Base Is Longer Than ZoneHeight X 25% of Zone With Bases - Rally'})
+
+                      console.log('Invalidated by Leg Bases - Longer than Base + 25% - Drop')
+                      break
                     }
                   }
                 }

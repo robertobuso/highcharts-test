@@ -170,6 +170,7 @@ console.log('Inside Chart Data')
 
   render() {
     console.log('Fresh Zones: ', this.state.finalPotentialZones)
+    console.log('Fresh Zone Indexes: ', this.state.finalPotentialZones.map(zone =>   [zone['incomingLeg'], zone['outgoingLeg']] ) )
     console.log('NOT Fresh Zones: ', this.state.notFresh)
     console.log('Unused Zones: ', this.state.unused)
     console.log('Invalid Because of Incoming Leg: ', this.state.badIncomingLeg)
