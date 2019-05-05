@@ -354,6 +354,7 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                   freshZones.push(zone)
 
                   //Check if the new fresh zone has the same outgoing leg or incoming leg of another fresh zone - Rally
+                if (positionArray.length > 0) {
                   for (let fz = 0; fz < freshZones.length; fz++) {
                     oldFreshZone = freshZones[fz]
 
@@ -446,6 +447,7 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                     break
                   }
               }
+            }
 
           //Insert new position created by fresh zone
               positionArray.push({'freshZoneIndex': (freshZones.length - 1), 'entryPrice': zone['entryPrice'], 'targetPrice': zone['targetPrice'], 'stopPrice': zone['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': zone['formation'], 'result': 'unfilled', 'outgoingLeg': zone['outgoingLeg'], 'incomingLeg': zone['incomingLeg'] } )
@@ -520,7 +522,8 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
 
                   freshZones.push(zone)
 
-                  //Check if the new fresh zone has the same outgoing leg or incoming leg of another fresh zone - Drop
+                //Check if the new fresh zone has the same outgoing leg or incoming leg of another fresh zone - Drop
+                if (positionArray.length > 0) {
                   for (let fz = 0; fz < freshZones.length; fz++) {
                     oldFreshZone = freshZones[fz]
 
@@ -612,6 +615,7 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                 break
               }
             }
+          }
 
         //Insert new position created by fresh zone
 
