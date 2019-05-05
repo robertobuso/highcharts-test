@@ -240,11 +240,18 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
             potentialZone.push(newArray[1])
             distinctPotentialZone = [...new Set(potentialZone)]
 
-            freshZones.push([ {'bases': distinctPotentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'fresh'}, {'incomingLeg': 0}, {'outgoingLeg': 3} ])
+            //Check if the new fresh zone has the same outgoing leg or incoming leg of another fresh zone
+            positionArray.forEach(oldFreshZone => {
+              if( (oldFreshZone['outgoingLeg'] === 2) || (oldFreshZone['incomingLeg'] === 0)) {
+                console.log('CHECK WHICH OF THE TWO ZONES SHOULD TRIGGER THE POSITION - First Three Bars in a Rally 3')
+              }
+            })
+
+            freshZones.push([ {'bases': distinctPotentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'fresh'}, {'incomingLeg': 0}, {'outgoingLeg': 2} ])
 
             const newFreshZoneIndex = freshZones.length - 1
 
-            positionArray.push({'freshZoneIndex': newFreshZoneIndex, 'entryPrice': freshZones[newFreshZoneIndex]['entryPrice'], 'targetPrice': freshZones[newFreshZoneIndex]['targetPrice'], 'stopPrice': freshZones[newFreshZoneIndex]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': freshZones[newFreshZoneIndex]['formation'], 'result': 'unfilled' } )
+            positionArray.push({'freshZoneIndex': newFreshZoneIndex, 'entryPrice': freshZones[newFreshZoneIndex]['entryPrice'], 'targetPrice': freshZones[newFreshZoneIndex]['targetPrice'], 'stopPrice': freshZones[newFreshZoneIndex]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': freshZones[newFreshZoneIndex]['formation'], 'result': 'unfilled', 'outgoingLeg': 2, 'incomingLeg': 0 } )
 
             freshZones[newFreshZoneIndex]['position'] = true
 
@@ -258,11 +265,18 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
           if (formation === 'drop' && barDistanceFromSupplyZone >= ((zoneCeiling-zoneFloor) * explosiveBarMultiplier)) {
             potentialZone.push(newArray[1])
 
-            freshZones.push([ {'bases': distinctPotentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'fresh'}, {'incomingLeg': 0}, {'outgoingLeg': 3} ])
+            //Check if the new fresh zone has the same outgoing leg or incoming leg of another fresh zone
+            positionArray.forEach(oldFreshZone => {
+              if( oldFreshZone['outgoingLeg'] === 2 || oldFreshZone['incomingLeg'] === 1) {
+                console.log('CHECK WHICH OF THE TWO ZONES SHOULD TRIGGER THE POSITION - First Three Bars in a Drop 3')
+              }
+            })
+
+            freshZones.push([ {'bases': distinctPotentialZone}, {'zoneCeiling': zoneCeiling}, {'zoneFloor': zoneFloor}, {'zoneHeight': zoneHeight}, {'formation': formation}, {'type': 'fresh'}, {'incomingLeg': 0}, {'outgoingLeg': 2} ])
 
             const newFreshZoneIndex = freshZones.length - 1
 
-            positionArray.push({'freshZoneIndex': newFreshZoneIndex, 'entryPrice': freshZones[newFreshZoneIndex]['entryPrice'], 'targetPrice': freshZones[newFreshZoneIndex]['targetPrice'], 'stopPrice': freshZones[newFreshZoneIndex]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': freshZones[newFreshZoneIndex]['formation'], 'result': 'unfilled' } )
+            positionArray.push({'freshZoneIndex': newFreshZoneIndex, 'entryPrice': freshZones[newFreshZoneIndex]['entryPrice'], 'targetPrice': freshZones[newFreshZoneIndex]['targetPrice'], 'stopPrice': freshZones[newFreshZoneIndex]['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': freshZones[newFreshZoneIndex]['formation'], 'result': 'unfilled', 'outgoingLeg': 2, 'incomingLeg': 0 } )
 
             freshZones[newFreshZoneIndex]['position'] = true
 
@@ -332,9 +346,19 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                   zone['entryPrice'] = zone['zoneCeiling'] + (averageTrueRange * 0.01)
                   zone['stopPrice'] = zone['zoneFloor'] - (averageTrueRange * 0.02)
 
+
+                  //Check if the new fresh zone has the same outgoing leg or incoming leg of another fresh zone
+                  positionArray.forEach(oldFreshZone => {
+                    if( (oldFreshZone['outgoingLeg'] === zone['outgoingLeg']) || (oldFreshZone['incomingLeg'] === zone['incomingLeg'])) {
+                      console.log('CHECK WHICH OF THE TWO ZONES SHOULD TRIGGER THE POSITION')
+                      console.log('oldFreshZone: ', oldFreshZone)
+                      console.log('new zone: ', zone)
+                    }
+                  })
+
                   freshZones.push(zone)
 
-                  positionArray.push({'freshZoneIndex': (freshZones.length - 1), 'entryPrice': zone['entryPrice'], 'targetPrice': zone['targetPrice'], 'stopPrice': zone['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': zone['formation'], 'result': 'unfilled' } )
+                  positionArray.push({'freshZoneIndex': (freshZones.length - 1), 'entryPrice': zone['entryPrice'], 'targetPrice': zone['targetPrice'], 'stopPrice': zone['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': zone['formation'], 'result': 'unfilled', 'outgoingLeg': zone['outgoingLeg'], 'incomingLeg': zone['incomingLeg'] } )
 
                   zone['position'] = true
 
@@ -403,9 +427,18 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                   zone['entryPrice'] = zone['zoneFloor'] - (averageTrueRange * 0.01)
                   zone['stopPrice'] = zone['zoneCeiling'] + (averageTrueRange * 0.02)
 
+                  //Check if the new fresh zone has the same outgoing leg or incoming leg of another fresh zone
+                  positionArray.forEach(oldFreshZone => {
+                    if( (oldFreshZone['outgoingLeg'] === zone['outgoingLeg']) || (oldFreshZone['incomingLeg'] === zone['incomingLeg'])) {
+                      console.log('CHECK WHICH OF THE TWO ZONES SHOULD TRIGGER THE POSITION - Drop')
+                      console.log('oldFreshZone: ', oldFreshZone)
+                      console.log('new zone: ', zone)
+                    }
+                  })
+
                   freshZones.push(zone)
 
-                  positionArray.push({'freshZoneIndex': (freshZones.length - 1), 'entryPrice': zone['entryPrice'], 'targetPrice': zone['targetPrice'], 'stopPrice': zone['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': zone['formation'], 'result': 'unfilled' } )
+                  positionArray.push({'freshZoneIndex': (freshZones.length - 1), 'entryPrice': zone['entryPrice'], 'targetPrice': zone['targetPrice'], 'stopPrice': zone['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': zone['formation'], 'result': 'unfilled', 'outgoingLeg': zone['outgoingLeg'], 'incomingLeg': zone['incomingLeg'] } )
 
                   zone['position'] = true
 

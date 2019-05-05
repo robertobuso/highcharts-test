@@ -66,6 +66,23 @@ floated='left'
 
 <Grid.Row className='row-parameter'>
 <Grid.Column width={4} textAlign='right' style={ {fontWeight: 'bold'} }>
+Leg-Base:
+</Grid.Column>
+<Grid.Column width={11}>
+<input
+name='legBase'
+type='text'
+className='number-input'
+placeholder='25'
+floated='left'
+// onChange={this.handleInputChange}
+/>
+{' % of the height of potential Zone without Leg-Bases'}
+</Grid.Column>
+</Grid.Row>
+
+<Grid.Row className='row-parameter'>
+<Grid.Column width={4} textAlign='right' style={ {fontWeight: 'bold'} }>
 Incoming Leg:
 </Grid.Column>
 <Grid.Column width={11}>
