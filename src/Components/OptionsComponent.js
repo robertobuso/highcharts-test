@@ -47,6 +47,9 @@ let filledPosition = {}
 let processedData = []
 let newArray =  []
 let actualBases = []
+let ignoreNewZone = false
+let oldPosition = {}
+let oldFreshZone = {}
 
 while (secondHgPrices.length > 1) {
     const bar = secondHgPrices.splice(0, 9)
@@ -298,11 +301,13 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
             console.log('zone: ', zone)
 
             //Check in Rally
-            if (zone['type'] === 'checking for fresh' && zone['formation'] === 'rally'){
+            if (zone['type'] === 'checking for fresh' && zone['formation'] === 'rally') {
               zone['isItFreshBars'] = zone['isItFreshBars'] + 1
 
               //Check if Price Returned to Zone
               if (bar[3] >= zone['zoneFloor'] && bar[4] <= zone['zoneCeiling']) {
+
+                ignoreNewZone = false
 
                 zone['priceReturnedToZone'] = zone['priceReturnedToZone'] + 1
 
@@ -346,38 +351,124 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                   zone['entryPrice'] = zone['zoneCeiling'] + (averageTrueRange * 0.01)
                   zone['stopPrice'] = zone['zoneFloor'] - (averageTrueRange * 0.02)
 
-
-                  //Check if the new fresh zone has the same outgoing leg or incoming leg of another fresh zone
-                  positionArray.forEach(oldFreshZone => {
-                    if( (oldFreshZone['outgoingLeg'] === zone['outgoingLeg']) || (oldFreshZone['incomingLeg'] === zone['incomingLeg'])) {
-                      console.log('CHECK WHICH OF THE TWO ZONES SHOULD TRIGGER THE POSITION')
-                      console.log('oldFreshZone: ', oldFreshZone)
-                      console.log('new zone: ', zone)
-                    }
-                  })
-
                   freshZones.push(zone)
 
-                  positionArray.push({'freshZoneIndex': (freshZones.length - 1), 'entryPrice': zone['entryPrice'], 'targetPrice': zone['targetPrice'], 'stopPrice': zone['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': zone['formation'], 'result': 'unfilled', 'outgoingLeg': zone['outgoingLeg'], 'incomingLeg': zone['incomingLeg'] } )
+                  //Check if the new fresh zone has the same outgoing leg or incoming leg of another fresh zone - Rally
+                  for (let fz = 0; fz < freshZones.length; fz++) {
+                    oldFreshZone = freshZones[fz]
 
-                  zone['position'] = true
+                    if( (oldFreshZone['outgoingLeg'] === zone['outgoingLeg']) || (oldFreshZone['incomingLeg'] === zone['incomingLeg'])) {
 
-                  resultsData['unfilled'] = resultsData['unfilled'] + 1
+                      console.log('CHECK WHICH OF THE TWO ZONES SHOULD TRIGGER THE POSITION - Rally')
+                      console.log('oldFreshZone: ', oldFreshZone)
+                      console.log('new zone: ', zone)
 
-                  //Set data to draw Zone in chart
+                      //If the stop price is the same, push the shortest Zone into the positionArray
+                      if( (oldFreshZone['zoneFloor'] === zone['zoneFloor']) ) {
+                        //If the new Zone is the shortest,remove old zone and insert new zone into positionArray
+                        if ( zone['zoneCeiling'] < oldFreshZone['zoneCeiling']) {
 
-                  zoneData.push(zone['bases'].map( bar => {return {'x': this.createDateTime(bar), 'high': zone['zoneCeiling'], 'low':  zone['zoneFloor']}}))
+                        ignoreNewZone = true
 
-                  //Set data to draw lines signaling fresh zone
-                  // zoneLines.push(zoneCeiling)
-                  // zoneLines.push(zoneFloor)
+                        oldPosition = positionArray.find( position => {
+                          return position['freshZoneIndex'] === freshZones.indexOf(oldFreshZone)
+                        })
 
-                  zoneCeiling = undefined
-                  zoneFloor = undefined
+                        oldPosition['positionStatus'] = 'closed'
+                        oldPosition['result'] = 'Closed because of Zone with identical incoming or outgoing leg'
 
-                console.log('FRESH ZONE! In a Rally', zone)
-                }
+                        positionArray.push({'freshZoneIndex': (freshZones.length - 1), 'entryPrice': zone['entryPrice'], 'targetPrice': zone['targetPrice'], 'stopPrice': zone['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': zone['formation'], 'result': 'unfilled', 'outgoingLeg': zone['outgoingLeg'], 'incomingLeg': zone['incomingLeg'] } )
+
+                        zone['position'] = true
+
+                        resultsData['unfilled'] = resultsData['unfilled'] + 1
+
+                        //Set data to draw Zone in chart
+
+                        zoneData.push(zone['bases'].map( bar => {return {'x': this.createDateTime(bar), 'high': zone['zoneCeiling'], 'low':  zone['zoneFloor']}}))
+
+                        //Set data to draw lines signaling fresh zone
+                        // zoneLines.push(zoneCeiling)
+                        // zoneLines.push(zoneFloor)
+
+                        zoneCeiling = undefined
+                        zoneFloor = undefined
+
+                        console.log('The new zone was shorter than the old zone, so the new zone triggers a position and the old zone is removed. Rally')
+                        break
+                      } else {
+                        ignoreNewZone = true
+                        console.log('The old zone was shorter than the new zone, so the new zone does not trigger a position. Rally')
+                        break
+                      }
+                      }
+                      //If the stop price is different, push the longest Zone into the positionArray
+                      else if ( (oldFreshZone['zoneFloor'] !== zone['zoneFloor']) ) {
+                        //If the new Zone is the longest, remove old zone and insert new zone into positionArray
+                        if ( zone['zoneCeiling'] > oldFreshZone['zoneCeiling']) {
+
+                        ignoreNewZone = true
+
+                       oldPosition = positionArray.find( position => {
+                        return position['freshZoneIndex'] === freshZones.indexOf(oldFreshZone)
+                      })
+
+                      oldPosition['positionStatus'] = 'closed'
+                      oldPosition['result'] = 'Closed because of Zone with identical incoming or outgoing leg'
+
+                        positionArray.push({'freshZoneIndex': (freshZones.length - 1), 'entryPrice': zone['entryPrice'], 'targetPrice': zone['targetPrice'], 'stopPrice': zone['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': zone['formation'], 'result': 'unfilled', 'outgoingLeg': zone['outgoingLeg'], 'incomingLeg': zone['incomingLeg'] } )
+
+                        zone['position'] = true
+
+                        resultsData['unfilled'] = resultsData['unfilled'] + 1
+
+                        //Set data to draw Zone in chart
+
+                        zoneData.push(zone['bases'].map( bar => {return {'x': this.createDateTime(bar), 'high': zone['zoneCeiling'], 'low':  zone['zoneFloor']}}))
+
+                        //Set data to draw lines signaling fresh zone
+                        // zoneLines.push(zoneCeiling)
+                        // zoneLines.push(zoneFloor)
+
+                        zoneCeiling = undefined
+                        zoneFloor = undefined
+
+                        console.log('The new zone was longer than the old zone, so the new zone triggers a position and the old zone is removed. Rally')
+                        break
+                      } else {
+                        ignoreNewZone = true
+                        console.log('The old zone was longer than the new zone, so the new zone does not trigger a position. Rally')
+                        break
+                      }
+                    }
+                  } else {
+                    ignoreNewZone = false
+                    break
+                  }
               }
+
+          //Insert new position created by fresh zone
+              positionArray.push({'freshZoneIndex': (freshZones.length - 1), 'entryPrice': zone['entryPrice'], 'targetPrice': zone['targetPrice'], 'stopPrice': zone['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': zone['formation'], 'result': 'unfilled', 'outgoingLeg': zone['outgoingLeg'], 'incomingLeg': zone['incomingLeg'] } )
+
+              zone['position'] = true
+
+              resultsData['unfilled'] = resultsData['unfilled'] + 1
+
+              //Set data to draw Zone in chart
+
+              zoneData.push(zone['bases'].map( bar => {return {'x': this.createDateTime(bar), 'high': zone['zoneCeiling'], 'low':  zone['zoneFloor']}}))
+
+              //Set data to draw lines signaling fresh zone
+              // zoneLines.push(zoneCeiling)
+              // zoneLines.push(zoneFloor)
+
+              zoneCeiling = undefined
+              zoneFloor = undefined
+
+            console.log('FRESH ZONE! In a Rally', zone)
+
+          }
+        }
 
               //Check if Price Returns to Zone or if Zone is Fresh - Drop
               if (zone && zone['type'] === 'checking for fresh' && zone['formation'] === 'drop'){
@@ -427,37 +518,125 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                   zone['entryPrice'] = zone['zoneFloor'] - (averageTrueRange * 0.01)
                   zone['stopPrice'] = zone['zoneCeiling'] + (averageTrueRange * 0.02)
 
-                  //Check if the new fresh zone has the same outgoing leg or incoming leg of another fresh zone
-                  positionArray.forEach(oldFreshZone => {
+                  freshZones.push(zone)
+
+                  //Check if the new fresh zone has the same outgoing leg or incoming leg of another fresh zone - Drop
+                  for (let fz = 0; fz < freshZones.length; fz++) {
+                    oldFreshZone = freshZones[fz]
+
                     if( (oldFreshZone['outgoingLeg'] === zone['outgoingLeg']) || (oldFreshZone['incomingLeg'] === zone['incomingLeg'])) {
+                      ignoreNewZone = false
+
                       console.log('CHECK WHICH OF THE TWO ZONES SHOULD TRIGGER THE POSITION - Drop')
                       console.log('oldFreshZone: ', oldFreshZone)
                       console.log('new zone: ', zone)
+
+                      //If the stop price is the same, push the shortest Zone into the positionArray
+                      if( (oldFreshZone['stopPrice'] === zone['stopPrice']) ) {
+
+                      //If the new Zone is the shortest,remove old zone and insert new zone into positionArray
+                      if ( zone['zoneHeight'] < oldFreshZone['zoneHeight']) {
+
+                        oldPosition = positionArray.find( position => {
+                          return position['freshZoneIndex'] === freshZones.indexOf(oldFreshZone)
+                        })
+
+                      oldPosition['positionStatus'] = 'closed'
+                      oldPosition['result'] = 'Closed because of Zone with identical incoming or outgoing leg'
+
+                      positionArray.push({'freshZoneIndex': (freshZones.length - 1), 'entryPrice': zone['entryPrice'], 'targetPrice': zone['targetPrice'], 'stopPrice': zone['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': zone['formation'], 'result': 'unfilled', 'outgoingLeg': zone['outgoingLeg'], 'incomingLeg': zone['incomingLeg'] } )
+
+                      zone['position'] = true
+
+                      resultsData['unfilled'] = resultsData['unfilled'] + 1
+
+                      //Set data to draw Zone in chart
+
+                      zoneData.push(zone['bases'].map( bar => {return {'x': this.createDateTime(bar), 'high': zone['zoneCeiling'], 'low':  zone['zoneFloor']}}))
+
+                      //Set data to draw lines signaling fresh zone
+                      // zoneLines.push(zoneCeiling)
+                      // zoneLines.push(zoneFloor)
+
+                      zoneCeiling = undefined
+                      zoneFloor = undefined
+
+                      console.log('The new zone was shorter than the old zone, so the new zone triggers a position and the old zone is removed. Drop')
+                      break
+                    } else {
+                      ignoreNewZone = true
+                      console.log('The old zone was shorter than the new zone, so the new zone does not trigger a position. Drop')
+                      break
                     }
-                  })
+                  }
+                  //If the stop price is different, push the longest Zone into the positionArray
+                  else if ( (oldFreshZone['stopPrice'] !== zone['stopPrice']) ) {
+                    //If the new Zone is the longest, remove old zone and insert new zone into positionArray
+                    if ( zone['zoneHeight'] > oldFreshZone['zoneHeight']) {
 
-                  freshZones.push(zone)
+                    oldPosition = positionArray.find( position => {
+                        return position['freshZoneIndex'] === freshZones.indexOf(oldFreshZone)
+                        }
+                    )
 
-                  positionArray.push({'freshZoneIndex': (freshZones.length - 1), 'entryPrice': zone['entryPrice'], 'targetPrice': zone['targetPrice'], 'stopPrice': zone['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': zone['formation'], 'result': 'unfilled', 'outgoingLeg': zone['outgoingLeg'], 'incomingLeg': zone['incomingLeg'] } )
+                    oldPosition['positionStatus'] = 'closed'
+                    oldPosition['result'] = 'Closed because of Zone with identical incoming or outgoing leg'
 
-                  zone['position'] = true
+                    positionArray.push({'freshZoneIndex': (freshZones.length - 1), 'entryPrice': zone['entryPrice'], 'targetPrice': zone['targetPrice'], 'stopPrice': zone['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': zone['formation'], 'result': 'unfilled', 'outgoingLeg': zone['outgoingLeg'], 'incomingLeg': zone['incomingLeg'] } )
 
-                  resultsData['unfilled'] = resultsData['unfilled'] + 1
+                    zone['position'] = true
 
-                  //Set data to draw Zone in chart
-                  zoneData.push(zone['bases'].map( bar => {return {'x': this.createDateTime(bar), 'high': zone['zoneCeiling'], 'low':  zone['zoneFloor']}}))
+                    resultsData['unfilled'] = resultsData['unfilled'] + 1
 
-                  //Set data to draw lines signaling fresh zone
-                  // zoneLines.push(zoneCeiling)
-                  // zoneLines.push(zoneFloor)
+                    //Set data to draw Zone in chart
 
-                  zoneCeiling = undefined
-                  zoneFloor = undefined
+                    zoneData.push(zone['bases'].map( bar => {return {'x': this.createDateTime(bar), 'high': zone['zoneCeiling'], 'low':  zone['zoneFloor']}}))
 
-                console.log('FRESH ZONE! In a Drop', zone)
+                    //Set data to draw lines signaling fresh zone
+                    // zoneLines.push(zoneCeiling)
+                    // zoneLines.push(zoneFloor)
+
+                    zoneCeiling = undefined
+                    zoneFloor = undefined
+
+                    console.log('The new zone was longer than the old zone, so the new zone triggers a position and the old zone is removed. Drop')
+                    break
+                  } else {
+                    ignoreNewZone = true
+                    console.log('The old zone was longer than the new zone, so the new zone does not trigger a position. Drop')
+                    break
+                  }
                 }
+              } else {
+                ignoreNewZone = false
+                break
               }
-            })
+            }
+
+        //Insert new position created by fresh zone
+
+        if (ignoreNewZone === false)
+          {
+            positionArray.push({'freshZoneIndex': (freshZones.length - 1), 'entryPrice': zone['entryPrice'], 'targetPrice': zone['targetPrice'], 'stopPrice': zone['stopPrice'], 'barsAfterPositionOpens': 0, 'positionStatus': 'unfilled', 'priceReturnedId': idx, 'zoneFormation': zone['formation'], 'result': 'unfilled', 'outgoingLeg': zone['outgoingLeg'], 'incomingLeg': zone['incomingLeg'] } )
+
+          zone['position'] = true
+
+          resultsData['unfilled'] = resultsData['unfilled'] + 1
+
+          //Set data to draw Zone in chart
+          zoneData.push(zone['bases'].map( bar => {return {'x': this.createDateTime(bar), 'high': zone['zoneCeiling'], 'low':  zone['zoneFloor']}}))
+
+          //Set data to draw lines signaling fresh zone
+          // zoneLines.push(zoneCeiling)
+          // zoneLines.push(zoneFloor)
+
+          zoneCeiling = undefined
+          zoneFloor = undefined
+
+        console.log('FRESH ZONE! In a Drop', zone) }
+          }
+        }
+      })
 
         console.log('About to Check position! positionArray: ', positionArray)
         console.log('Were checking bar: ', bar)
@@ -580,23 +759,23 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                 }
               }
           } else {
-            console.log('There were NO POSITIONS')
+            console.log('There were NO OPEN POSITIONS')
           }
 
-          console.log('Checking if the Price Returns to a FRESH OPEN Zone')
+          console.log('Checking if the Price Returns to an UNFILLED POSITION (a FRESH OPEN Zone)')
           //Check if the Price returns to a Fresh, Open Zone
-          if (freshZones.length > 0) {
-            for (let x = 0; x < freshZones.length; x++) {
+          if (positionArray.length > 0) {
+            for (let x = 0; x < positionArray.length; x++) {
 
               //Check if Price returns in a Rally
-              if(freshZones[x]['formation'] === 'rally' && bar[4] <= freshZones[x]['entryPrice'] && freshZones[x]['position']=== true) {
+              if(positionArray[x]['zoneFormation'] === 'rally' && bar[4] <= positionArray[x]['entryPrice'] && positionArray[x]['positionStatus']=== 'unfilled') {
 
-              filledPosition = positionArray.find(zone => zone['freshZoneIndex'] === x)
+              filledPosition = positionArray[x]
 
               filledPosition['positionStatus'] = 'open'
               filledPosition['result'] = 'open'
 
-              freshZones[x]['position'] = false
+              // freshZones[x]['position'] = false
 
               resultsData['unfilled'] = resultsData['unfilled'] - 1
               resultsData['open'] = resultsData['open'] + 1
@@ -607,14 +786,14 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                 console.log('zone: ', freshZones[x])
               }
               //Check if Price returns in a Drop
-              if(freshZones[x]['formation'] === 'drop' && bar[3] >= freshZones[x]['entryPrice'] && freshZones[x]['position'] === true) {
+              if(positionArray[x]['zoneFormation'] === 'drop' && bar[3] >= positionArray[x]['entryPrice'] && positionArray[x]['positionStatus'] === 'unfilled') {
 
-                filledPosition = positionArray.find(zone => zone['freshZoneIndex'] === x)
+                filledPosition = positionArray[x]
 
                 filledPosition['positionStatus'] = 'open'
                 filledPosition['result'] = 'open'
 
-                freshZones[x]['position'] = false
+                // freshZones[x]['position'] = false
 
                 resultsData['unfilled'] = resultsData['unfilled'] - 1
                 resultsData['open'] = resultsData['open'] + 1
@@ -935,6 +1114,8 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                   }
                 }
 
+                //Done checking legBases for Rally and Drop
+
                 //Are there are more Leg-Bases than Bases?
                 if( (numberOfLegs/potentialZone.length) >= 0.5) {
 
@@ -948,7 +1129,7 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
                 if (zoneInvalidatedByLegBases === false) {
                   console.log('Zone Is Valid - Passed Leg Bases')
 
-                //Set the percentage the leg is inside the Zone depending on where it penetrates
+                //Set the percentage the outgoingLeg is inside the Zone depending on where it penetrates
 
                 if (bar[4] < zoneCeiling && bar[3] > zoneFloor) {
                   //Bar is Inside Zone
