@@ -1339,7 +1339,7 @@ console.log('Bubi: componentDidUpdate in OptionsComponent')
 
     render() {
       console.log('In OptionsComponent, explosiveBarMultiplier is: ', this.state.explosiveBarMultiplier)
-      console.log('RENDERING OptionsComponnet. this.state.baseMarkers.length: ', this.state.baseMarkers.length)
+      console.log('RENDERING OptionsComponent. this.state.baseMarkers.length: ', this.state.baseMarkers.length)
       return (
         <div></div>
       )
